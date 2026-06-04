@@ -16,6 +16,7 @@
     username = user;
     homeDirectory = "/home/${user}";
 
+
     packages = with pkgs; [
       # files
       zip
@@ -42,6 +43,13 @@
     };
 
     activation = {
+      git-credentials =
+        lib.hm.dag.entryAfter [ "writeBoundary" ]
+          # bash
+          ''
+            echo "https://heshian:$(cat ${config.age.secrets.nix_github_token.path})@github.com" > $HOME/.git-credentials
+            chmod 600 $HOME/.git-credentials
+          '';
       reload-shell =
         lib.hm.dag.entryAfter [ "writeBoundary" ]
           # bash
@@ -92,6 +100,7 @@
           directory = "*";
         };
         http.proxy = "http://127.0.0.1:7890";
+        credential.helper = "store";
       };
     };
 
