@@ -85,8 +85,8 @@
       enable = true;
       settings = {
         user = {
-          name = "EdenQwQ";
-          email = "lsahlm1eden@gmail.com";
+          name = "heshian";
+          email = "3453289292@qq.com";
         };
         safe = {
           directory = "*";

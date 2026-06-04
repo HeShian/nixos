@@ -1,17 +1,7 @@
 {
   age.secrets = {
-    siliconflow_token.file = ./siliconflow_token.age;
-    gemini_token.file = ./gemini_token.age;
-    deepseek_token.file = ./deepseek_token.age;
-    zjuchat_token.file = ./zjuchat_token.age;
-    tavily_token.file = ./tavily_token.age;
-    zjuconnect_password.file = ./zjuconnect_password.age;
-    linkai_token.file = ./linkai_token.age;
-    anyrouter_token.file = ./anyrouter_token.age;
-    kimi_token.file = ./kimi_token.age;
-    telegram_bot_token.file = ./telegram_bot_token.age;
-    openrouter_token.file = ./openrouter_token.age;
     mimo_token.file = ./mimo_token.age;
     nix_github_token.file = ./nix_github_token.age;
+    clash_subscription_url.file = ./clash_subscription_url.age;
   };
 }

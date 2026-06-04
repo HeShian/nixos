@@ -58,7 +58,7 @@ let
     {
       name = "zzzzoka-gbc.jpg";
       url = "https://i.imgur.com/qE6Pr45.jpg";
-      sha256 = "1li5ypdvlvdpihiplf5mjj0lvf9gbcwyjslpxgla6wz0fzrwnvgi";
+      sha256 = "11vi8l5s9cw0l590dgg186mbhvj9vkb839l7q5ahc176h744x8ps";
     }
     {
       name = "celestia-lunar.jpg";

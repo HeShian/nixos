@@ -5,28 +5,16 @@
   ...
 }:
 {
-  programs.gemini-cli = {
-    enable = true;
-  };
   programs.claude-code = {
     enable = true;
   };
   home.sessionVariables = {
-    GEMINI_API_KEY = "$(cat ${config.age.secrets.gemini_token.path})";
-    ANTHROPIC_AUTH_TOKEN = "$(cat ${config.age.secrets.anyrouter_token.path})";
-    ANTHROPIC_BASE_URL = "https://anyrouter.top";
-    SILICONFLOW_API_KEY = "$(cat ${config.age.secrets.siliconflow_token.path})";
-    MOONSHOT_API_KEY = "$(cat ${config.age.secrets.kimi_token.path})";
-    TELEGRAM_BOT_TOKEN = "$(cat ${config.age.secrets.telegram_bot_token.path})";
-    OPENROUTER_API_KEY = "$(cat ${config.age.secrets.openrouter_token.path})";
     XIAOMI_API_KEY = "$(cat ${config.age.secrets.mimo_token.path})";
   };
   home.packages = with pkgs; [
-    inputs.kimi-cli.packages.${pkgs.stdenv.hostPlatform.system}.default
-    #inputs.airi.packages.${pkgs.stdenv.hostPlatform.system}.default
     opencode
     codex
     gitingest
-    inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default
+    claude-code
   ];
 }

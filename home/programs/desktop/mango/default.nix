@@ -190,8 +190,8 @@
         # menu and terminal
         bind=SUPER,p,spawn,sh -c \$(tofi-run)
         bind=SUPER,Return,spawn,kitty
-        bind=SUPER+SHIFT,C,spawn,/home/eden/scripts/tofi/colorscheme
-        bind=SUPER+SHIFT,W,spawn,/home/eden/scripts/change-wal-wayland
+        bind=SUPER+SHIFT,C,spawn,/home/${user}/scripts/tofi/colorscheme
+        bind=SUPER+SHIFT,W,spawn,/home/${user}/scripts/change-wal-wayland
 
         # exit
         bind=SUPER,q,killclient,

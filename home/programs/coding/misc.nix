@@ -5,6 +5,6 @@
     nixfmt
     texlab
     prettier
-    julia-bin
+    # julia-bin  # temporarily disabled - slow download
   ];
 }

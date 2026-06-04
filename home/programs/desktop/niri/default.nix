@@ -147,7 +147,7 @@
             name = "browsing";
           };
           "3" = {
-            open-on-output = builtins.head otherMonitorsNames;
+            open-on-output = if otherMonitorsNames != [] then builtins.head otherMonitorsNames else mainMonitorName;
             name = "reading";
           };
           "4" = {
