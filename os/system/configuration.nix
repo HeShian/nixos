@@ -63,10 +63,7 @@
 
     openssh.enable = true;
 
-    # dae = {
-    #   enable = true;
-    #   configFile = "/home/${user}/.config/dae/config.dae";
-    # };
+    v2raya.enable = true;
 
     flatpak.enable = true;
 
@@ -151,6 +148,12 @@
     };
 
     localBinInPath = true;
+  };
+
+  # nix-daemon 使用 v2raya 代理（可正确代理国外站点）
+  systemd.services.nix-daemon.environment = {
+    HTTP_PROXY = "http://127.0.0.1:20171";
+    HTTPS_PROXY = "http://127.0.0.1:20171";
   };
 
   systemd.user.services = {

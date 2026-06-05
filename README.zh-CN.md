@@ -19,6 +19,8 @@
 | 代理 | Mihomo / Clash Meta |
 | 输入法 | Fcitx5 |
 | 桌面 Shell | dank-material-shell / caelestia-shell / noctalia-shell |
+| 显卡 | NVIDIA GTX 1650 + Intel UHD 630（Optimus） |
+| 硬件解码 | Intel VAAPI + NVIDIA NVDEC |
 | 构建工具 | nh |
 
 ## 快速开始
@@ -54,6 +56,7 @@ nix flake update  # 更新所有输入
 | 目录结构 | [directory-structure.md](docs/en/directory-structure.md) | [directory-structure.md](docs/zh-CN/directory-structure.md) |
 | 自定义指南 | [customization.md](docs/en/customization.md) | [customization.md](docs/zh-CN/customization.md) |
 | 故障排除 | [troubleshooting.md](docs/en/troubleshooting.md) | [troubleshooting.md](docs/zh-CN/troubleshooting.md) |
+| **系统指南** | [system-guide.md](docs/en/system-guide.md) | [system-guide.md](docs/zh-CN/system-guide.md) |
 
 ## 许可证
 
