@@ -3,10 +3,6 @@
   xdg.configFile."swhkd/basic.swhkdrc".text = config.lib.swhkd.mkSwhkdrc {
     keyBindings = [
       {
-        key = "super + shift + r";
-        command = "pkill -HUP swhkd";
-      }
-      {
         key = "super + alt + c";
         command = "wl-color-picker";
       }

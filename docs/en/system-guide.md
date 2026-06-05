@@ -119,9 +119,8 @@ All shortcuts use **Super** (Windows/Meta key) as the primary modifier.
 
 | Shortcut | Action |
 |----------|--------|
-| `Super + Shift + R` | Reload swhkd config |
+| `Super + Shift + R` | Restart swhkd (hotkey daemon) |
 | `Super + Shift + S` | Show key overlay (wshowkeys) |
-| `Caps Lock` | Remapped to Escape |
 
 ---
 

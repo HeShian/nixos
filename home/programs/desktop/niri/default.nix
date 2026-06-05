@@ -58,6 +58,15 @@
             "$(tofi-run)"
           ];
           "Mod+Shift+C".action = spawn "/home/${user}/scripts/tofi/colorscheme";
+          "Mod+WheelScrollDown".action = focus-column-right;
+          "Mod+WheelScrollUp".action = focus-column-left;
+          "Mod+Shift+WheelScrollDown".action = focus-workspace-down;
+          "Mod+Shift+WheelScrollUp".action = focus-workspace-up;
+          "Mod+Shift+R".action = spawn [
+            "sh"
+            "-c"
+            "pkill -HUP swhkd || (swhks & doas swhkd -c ~/.config/niri/swhkd/niri.swhkdrc)"
+          ];
         };
         window-rules =
           let

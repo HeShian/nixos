@@ -119,9 +119,8 @@
 
 | 快捷键 | 功能 |
 |--------|------|
-| `Super + Shift + R` | 重载 swhkd 配置 |
+| `Super + Shift + R` | 重启 swhkd（快捷键守护进程） |
 | `Super + Shift + S` | 显示按键叠加层（wshowkeys） |
-| `Caps Lock` | 映射为 Escape |
 
 ---
 
