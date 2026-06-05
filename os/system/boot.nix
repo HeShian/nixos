@@ -1,4 +1,4 @@
-{ inputs, pkgs, ... }:
+{ pkgs, ... }:
 {
   boot = {
     kernelPackages = pkgs.linuxPackages;

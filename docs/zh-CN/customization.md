@@ -55,7 +55,7 @@ nvidia-offload blender         # 3D 渲染
 curl -x http://127.0.0.1:7890 https://www.google.com
 
 # 更新订阅
-mihomo -f "$(cat ~/.config/age-secrets/clash_subscription_url)" -d ~/.config/mihomo
+curl -sL -o ~/.config/mihomo/config.yaml "$(cat ~/.config/age-secrets/clash_subscription_url)"
 ```
 
 ---

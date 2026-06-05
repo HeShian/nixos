@@ -129,21 +129,6 @@ sudo nixos-rebuild switch
 git add -A
 ```
 
-## 透明代理干扰 Nix 构建
-
-如果 v2raya 的透明代理导致 `nixos-rebuild` 时出现 SSL 错误：
-
-```bash
-# 临时清除透明代理 iptables 规则
-sudo iptables -t nat -F TP_OUT
-sudo iptables -t nat -F TP_PRE
-
-# 然后重建
-sudo nixos-rebuild switch --flake .#<主机名>
-
-# v2raya 重启后会自动恢复规则
-```
-
 ## NVIDIA 驱动下载失败（403 / SSL 错误）
 
 如果 NVIDIA 驱动 `.run` 文件无法下载：
@@ -166,16 +151,4 @@ nix build /nix/store/<modules-drv-path>
 
 # 然后重建
 sudo nixos-rebuild switch --flake .#<主机名>
-```
-
-## v2raya 代理无法访问国外 HTTPS
-
-如果 v2raya HTTP 代理（20171）访问国外站点返回 SSL 错误：
-
-```bash
-# 检查中国镜像是否可用
-curl -sL -w "%{http_code}" -o /dev/null "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store/nix-cache-info"
-
-# 如果中国镜像可用，临时在 nix/substituters.nix 中只使用中国镜像
-# 移除 cache.nixos.org 和 cachix 条目
 ```

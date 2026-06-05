@@ -55,7 +55,7 @@ The proxy runs at `127.0.0.1:7890` via mihomo. All HTTP/HTTPS traffic is proxied
 curl -x http://127.0.0.1:7890 https://www.google.com
 
 # Update subscription
-mihomo -f "$(cat ~/.config/age-secrets/clash_subscription_url)" -d ~/.config/mihomo
+curl -sL -o ~/.config/mihomo/config.yaml "$(cat ~/.config/age-secrets/clash_subscription_url)"
 ```
 
 ---

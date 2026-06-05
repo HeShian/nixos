@@ -183,7 +183,7 @@ sudo reboot
 
 ```bash
 # 拉取代理订阅
-mihomo -f "$(cat ~/.config/age-secrets/clash_subscription_url)" -d ~/.config/mihomo
+curl -sL -o ~/.config/mihomo/config.yaml "$(cat ~/.config/age-secrets/clash_subscription_url)"
 
 # 验证代理工作
 curl -x http://127.0.0.1:7890 https://www.google.com

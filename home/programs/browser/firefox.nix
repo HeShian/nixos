@@ -1,4 +1,4 @@
-{ inputs, pkgs, ... }:
+{ pkgs, ... }:
 {
   programs.firefox = {
     enable = true;
@@ -11,6 +11,9 @@
         "browser.tabs.groups.enabled" = true;
         "browser.tabs.groups.smart.enabled" = true;
         "svg.context-properties.content.enabled" = true;
+        "media.ffmpeg.vaapi.enabled" = true;
+        "media.hardware-video-decoding.enabled" = true;
+        "gfx.webrender.all" = true;
       };
     };
   };

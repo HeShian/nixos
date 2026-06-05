@@ -3,7 +3,7 @@
   monitors = {
     "eDP-1" = {
       isMain = true;
-      scale = 1.0;
+      scale = 1.25;
       mode = {
         width = 1920;
         height = 1080;

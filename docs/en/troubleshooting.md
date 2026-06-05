@@ -129,21 +129,6 @@ If you see `Path '...' in the repository is not tracked by Git`:
 git add -A
 ```
 
-## Transparent Proxy Interfering with Nix Build
-
-If v2raya's transparent proxy causes SSL errors during `nixos-rebuild`:
-
-```bash
-# Temporarily flush transparent proxy iptables rules
-sudo iptables -t nat -F TP_OUT
-sudo iptables -t nat -F TP_PRE
-
-# Then rebuild
-sudo nixos-rebuild switch --flake .#<hostname>
-
-# v2raya will restore the rules on restart
-```
-
 ## NVIDIA Driver Download Fails (403 / SSL Error)
 
 If the NVIDIA driver `.run` file can't be downloaded:
@@ -166,16 +151,4 @@ nix build /nix/store/<modules-drv-path>
 
 # Then rebuild
 sudo nixos-rebuild switch --flake .#<hostname>
-```
-
-## v2raya Proxy Not Working for HTTPS
-
-If the v2raya HTTP proxy (20171) returns SSL errors for foreign sites:
-
-```bash
-# Check if direct connection to Chinese mirrors works
-curl -sL -w "%{http_code}" -o /dev/null "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store/nix-cache-info"
-
-# If Chinese mirrors work, use only Chinese mirrors in nix/substituters.nix
-# Remove cache.nixos.org and cachix entries temporarily
 ```

@@ -183,7 +183,7 @@ After reboot:
 
 ```bash
 # Pull proxy subscription
-mihomo -f "$(cat ~/.config/age-secrets/clash_subscription_url)" -d ~/.config/mihomo
+curl -sL -o ~/.config/mihomo/config.yaml "$(cat ~/.config/age-secrets/clash_subscription_url)"
 
 # Verify proxy works
 curl -x http://127.0.0.1:7890 https://www.google.com

@@ -32,12 +32,6 @@
     ];
 
     sessionVariables = {
-      all_proxy = "http://127.0.0.1:7890";
-      ALL_PROXY = "http://127.0.0.1:7890";
-      HTTP_PROXY = "http://127.0.0.1:7890";
-      HTTPS_PROXY = "http://127.0.0.1:7890";
-      http_PROXY = "http://127.0.0.1:7890";
-      https_PROXY = "http://127.0.0.1:7890";
       NIXPKGS_ALLOW_UNFREE = "1";
       NIXPKGS_ALLOW_INSECURE = "1";
     };
@@ -54,19 +48,11 @@
         lib.hm.dag.entryAfter [ "writeBoundary" ]
           # bash
           ''
-            # only run stop if the service is active
-            if ${pkgs.systemd}/bin/systemctl --user is-active waybar.service; then
-              run --silence ${pkgs.systemd}/bin/systemctl --user stop waybar.service
-            fi
-            if ${pkgs.systemd}/bin/systemctl --user is-active dms.service; then
-              run --silence ${pkgs.systemd}/bin/systemctl --user stop dms.service
-            fi
-            if ${pkgs.systemd}/bin/systemctl --user is-active caelestia.service; then
-              run --silence ${pkgs.systemd}/bin/systemctl --user stop caelestia.service
-            fi
-            if ${pkgs.systemd}/bin/systemctl --user is-active noctalia-shell.service; then
-              run --silence ${pkgs.systemd}/bin/systemctl --user stop noctalia-shell.service
-            fi
+            for svc in waybar dms caelestia noctalia-shell; do
+              if ${pkgs.systemd}/bin/systemctl --user is-active "$svc.service"; then
+                run --silence ${pkgs.systemd}/bin/systemctl --user stop "$svc.service"
+              fi
+            done
             run --silence ${pkgs.systemd}/bin/systemctl --user start ${config.desktopShell}.service
           '';
     };

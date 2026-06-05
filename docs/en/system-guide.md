@@ -154,7 +154,7 @@ nvidia-smi                # Check GPU status
 
 # Proxy
 curl -x http://127.0.0.1:7890 https://www.google.com  # Test proxy
-mihomo -f "$(cat ~/.config/age-secrets/clash_subscription_url)" -d ~/.config/mihomo  # Update subscription
+curl -sL -o ~/.config/mihomo/config.yaml "$(cat ~/.config/age-secrets/clash_subscription_url)"  # Update subscription
 
 # Secrets
 agenix -e secrets/<name>.age  # Edit a secret
@@ -231,9 +231,9 @@ nvidia-smi                # Check NVIDIA GPU
 All HTTP/HTTPS traffic is proxied through `127.0.0.1:7890` (mihomo).
 
 - Environment variables are set system-wide (`HTTP_PROXY`, `HTTPS_PROXY`)
+- nix-daemon connects directly to Chinese mirrors (tuna/ustc) without proxy
 - Subscription URL is stored as an agenix secret
 - A systemd timer updates the subscription daily
-- v2raya is also available on port 20171/20170 (HTTP/SOCKS5)
 
 ### Agenix Secret Management
 

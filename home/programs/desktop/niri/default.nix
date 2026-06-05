@@ -34,7 +34,6 @@
           focus-follows-mouse.enable = true;
           touchpad.natural-scroll = false;
           touchpad.dwt = true;
-          keyboard.xkb.options = "caps:escape";
         };
         environment = {
           DISPLAY = ":0";

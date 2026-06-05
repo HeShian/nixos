@@ -63,8 +63,6 @@
 
     openssh.enable = true;
 
-    v2raya.enable = true;
-
     flatpak.enable = true;
 
     upower.enable = true;
@@ -72,6 +70,8 @@
     udisks2.enable = true;
 
     power-profiles-daemon.enable = true;
+
+    v2raya.enable = true;
   };
 
   security = {
@@ -148,12 +148,6 @@
     };
 
     localBinInPath = true;
-  };
-
-  # nix-daemon 使用 v2raya 代理（可正确代理国外站点）
-  systemd.services.nix-daemon.environment = {
-    HTTP_PROXY = "http://127.0.0.1:20171";
-    HTTPS_PROXY = "http://127.0.0.1:20171";
   };
 
   systemd.user.services = {

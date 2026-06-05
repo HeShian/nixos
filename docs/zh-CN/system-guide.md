@@ -154,7 +154,7 @@ nvidia-smi                # 查看 GPU 状态
 
 # 代理
 curl -x http://127.0.0.1:7890 https://www.google.com  # 测试代理
-mihomo -f "$(cat ~/.config/age-secrets/clash_subscription_url)" -d ~/.config/mihomo  # 更新订阅
+curl -sL -o ~/.config/mihomo/config.yaml "$(cat ~/.config/age-secrets/clash_subscription_url)"  # 更新订阅
 
 # 密钥管理
 agenix -e secrets/<名称>.age  # 编辑密钥
@@ -231,9 +231,9 @@ nvidia-smi                # 查看 NVIDIA GPU
 所有 HTTP/HTTPS 流量通过 `127.0.0.1:7890`（mihomo）代理。
 
 - 系统级环境变量设置（`HTTP_PROXY`、`HTTPS_PROXY`）
+- nix-daemon 直连国内镜像（tuna/ustc），不走代理
 - 订阅链接存储为 agenix 密钥
 - systemd 定时器每天自动更新订阅
-- v2raya 也可用，端口 20171/20170（HTTP/SOCKS5）
 
 ### Agenix 密钥管理
 
