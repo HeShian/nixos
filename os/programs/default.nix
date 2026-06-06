@@ -7,6 +7,7 @@
     ./swhkd.nix
     ./matlab.nix
     ./tuigreet.nix
+    ./gaming.nix
     # ./cosmic.nix
   ];
 

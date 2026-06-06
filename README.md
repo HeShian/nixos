@@ -56,6 +56,8 @@ nix flake update  # Update all inputs
 | Directory Structure | [directory-structure.md](docs/en/directory-structure.md) | [directory-structure.md](docs/zh-CN/directory-structure.md) |
 | Customization | [customization.md](docs/en/customization.md) | [customization.md](docs/zh-CN/customization.md) |
 | Troubleshooting | [troubleshooting.md](docs/en/troubleshooting.md) | [troubleshooting.md](docs/zh-CN/troubleshooting.md) |
+| Neovim | [neovim.md](docs/en/neovim.md) | [neovim.md](docs/zh-CN/neovim.md) |
+| Installed Software | [installed-software.md](docs/en/installed-software.md) | [installed-software.md](docs/zh-CN/installed-software.md) |
 | **System Guide** | [system-guide.md](docs/en/system-guide.md) | [system-guide.md](docs/zh-CN/system-guide.md) |
 
 ## License

@@ -28,6 +28,7 @@
         };
       in
       {
+        debug.render-drm-device = "/dev/dri/renderD129";
         hotkey-overlay.skip-at-startup = true;
         prefer-no-csd = true;
         input = {

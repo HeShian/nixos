@@ -56,6 +56,8 @@ nix flake update  # 更新所有输入
 | 目录结构 | [directory-structure.md](docs/en/directory-structure.md) | [directory-structure.md](docs/zh-CN/directory-structure.md) |
 | 自定义指南 | [customization.md](docs/en/customization.md) | [customization.md](docs/zh-CN/customization.md) |
 | 故障排除 | [troubleshooting.md](docs/en/troubleshooting.md) | [troubleshooting.md](docs/zh-CN/troubleshooting.md) |
+| Neovim | [neovim.md](docs/en/neovim.md) | [neovim.md](docs/zh-CN/neovim.md) |
+| 已安装软件 | [installed-software.md](docs/en/installed-software.md) | [installed-software.md](docs/zh-CN/installed-software.md) |
 | **系统指南** | [system-guide.md](docs/en/system-guide.md) | [system-guide.md](docs/zh-CN/system-guide.md) |
 
 ## 许可证
