@@ -43,6 +43,14 @@
         key = "super + e";
         command = "hexecute";
       }
+      {
+        key = "XF86MonBrightnessUp";
+        command = "brightnessctl set +5%";
+      }
+      {
+        key = "XF86MonBrightnessDown";
+        command = "brightnessctl set 5%-";
+      }
     ];
   };
   xdg.configFile."swhkd/tofi.swhkdrc".text = config.lib.swhkd.mkSwhkdrc {

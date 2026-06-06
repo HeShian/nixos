@@ -61,5 +61,6 @@ in
   programs.niri.settings.spawn-at-startup = [
     { command = [ "${niri-autostart}/bin/niri-autostart" ]; }
     { command = [ "${pkgs.xwayland-satellite}/bin/xwayland-satellite" ]; }
+    { command = [ "FlClash" ]; }
   ];
 }

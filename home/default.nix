@@ -29,6 +29,7 @@
       fzf
       eza
       fd
+      brightnessctl
     ];
 
     sessionVariables = {
@@ -104,5 +105,20 @@
     };
 
     home-manager.enable = true;
+  };
+
+  xdg.userDirs = {
+    enable = true;
+    desktop = "$HOME/Desktop";
+    download = "$HOME/Downloads";
+    templates = "$HOME/Templates";
+    publicShare = "$HOME/Public";
+    documents = "$HOME/Documents";
+    music = "$HOME/Music";
+    pictures = "$HOME/Pictures";
+    videos = "$HOME/Videos";
+    extraConfig = {
+      XDG_PROJECTS_DIR = "$HOME/Projects";
+    };
   };
 }

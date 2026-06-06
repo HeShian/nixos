@@ -12,7 +12,7 @@ fi
 if [ -z "$os_specialisations" ]; then
     os_specialisations=$current_os_profile/specialisation
 else
-    specialisations=$(dirname $specialisations | xargs ls -dt | head -n1)
+    os_specialisations=$(dirname $os_specialisations)
 fi
 colorscheme=$( (ls "$specialisations"; echo default) | tofi --require-match=false)
 
@@ -23,5 +23,10 @@ fi
 if [ "$colorscheme" = "default" ]; then
     colorscheme=".."
 fi
+base_gen=$(realpath "$current_profile")
+nix profile remove home-manager-path 2>/dev/null
 "$specialisations/$colorscheme"/activate > ~/scripts/tofi/t
+if [ ! -d "$current_profile/specialisation" ] && [ -d "$base_gen/specialisation" ]; then
+    ln -s "$base_gen/specialisation" "$current_profile/specialisation"
+fi
 doas "$os_specialisations/$colorscheme"/bin/switch-to-configuration switch
