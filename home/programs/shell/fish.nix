@@ -16,10 +16,10 @@
       };
       shellInit = ''
         zoxide init fish | source
-        export PATH="$HOME/.local/bin:$HOME/.juliaup/bin:$PATH"
+        export PATH="$HOME/.local/bin:$HOME/.juliaup/bin:$HOME/.kimi-code/bin:$PATH"
 
         if test -n "$container"
-          export PATH="$HOME/.local/bin:$HOME/.juliaup/bin:$HOME/.npm-global/bin:$PATH"
+          export PATH="$HOME/.local/bin:$HOME/.juliaup/bin:$HOME/.npm-global/bin:$HOME/.kimi-code/bin:$PATH"
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv fish)"
         end
 
