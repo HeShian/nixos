@@ -7,6 +7,7 @@
     desktop-fonts
     desktop-audio
     desktop-applications
+    clash-verge
     desktop-flatpak
     desktop-portals
     desktop-localization
