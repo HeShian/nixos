@@ -1,6 +1,8 @@
 { inputs, ... }:
 {
-  # Den 的 flake 集成入口。输入本身在 flake.nix 的 inputs 里声明，
-  # 这里只负责把这个 flakeModule 接进 evalModules（与 templates/default 的 dendritic.nix 同职）。
-  imports = [ inputs.den.flakeModule ];
+  # Den 的 flake-parts 集成入口。输入本身在 flake.nix 的 inputs 里声明。
+  #
+  # 用 flakeModules.default（纯模块，不依赖 flake-file）：
+  # flakeModules.dendritic 会额外写 flake-file 的 input 默认值，需要引入 flake-file 输入。
+  imports = [ inputs.den.flakeModules.default ];
 }

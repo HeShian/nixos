@@ -5,16 +5,18 @@
 ## 目录
 
 ```text
-flake.nix                         # flake 输入与 Den 求值
+flake.nix                         # flake 输入与 flake-parts 入口
 dotfiles/                         # 经常改的纯文本配置（活链接源）
   .config/niri/                   # niri：config / binds / windowrules / layout / animations / blur / supertab / outputs / scripts
   .config/{kitty,fish,fuzzel,mpv,satty,cava,fontconfig,matugen}/
 modules/                          # import-tree 递归加载
-  dendritic.nix                   # Den 的 flake 集成入口
+  dendritic.nix                   # Den 的 flake 接入（flake-parts 模块）
+  nh.nix                          # perSystem：把每台 host 暴露成 `nix build .#acer`
   aspects/
     den.nix                       # den.hosts 声明 + den.schema
     defaults.nix                  # den.default：所有实体的全局默认
-    features/                     # 29 个功能 aspect：desktop-* / niri / dux-* / system-* / network…
+    features/                     # 28 个功能 aspect：desktop-* / niri / dux-* / system-* / network…
+    roles/                        # 组合 aspect：desktop = 桌面这一组 feature 的集合
     hosts/                        # acer、nixos-vm（host aspect：硬件 + 引入哪些 aspect）
     users/                        # claudia、user-vm（user aspect：身份与 git）
   _lib/                           # 非 aspect 的辅助函数（import-tree 忽略 _ 前缀）

@@ -30,6 +30,10 @@ _Avoid_: 插件、工具
 写在 `den.default` 里的设置，Den 会自动注入每一种实体，因此对所有 host / user / home 成立，不需要任何文件 include。
 _Avoid_: 公共模块、base
 
+**Role**：
+把多个 feature aspect 组合成一种机器形态的 aspect（如 `desktop`），只写 includes、不放具体配置。
+_Avoid_: 预设、模式、profile
+
 ### 配置归属
 
 **Dotfile**：
