@@ -1,2 +1,8 @@
 result
 result-*
+
+# DMS / matugen 生成的运行时文件；dotfiles 里有目录级软链，防止将来误跟踪
+dotfiles/.config/dms/
+dotfiles/.config/kitty/dank-*.conf
+dotfiles/.config/fuzzel/colors.ini
+dotfiles/.config/gtk-*/dank-colors.css
