@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# 在 DMS 管理的壁纸之间切换（按 DMS 的壁纸列表顺序）。
+# 绑定到 Mod+F10。
+set -uo pipefail
+
+result=$(dms ipc call wallpaper next 2>&1) || true
+if [[ "$result" == *'Per-monitor mode enabled'* ]]; then
+    if output=$(niri msg -j focused-output | jq -er '.name'); then
+        result=$(dms ipc call wallpaper nextFor "$output" 2>&1) || true
+    fi
+fi
+if [[ "$result" == SUCCESS:* ]]; then exit 0; fi
+
+notify-send -a "wallpaper-random" "无法切换壁纸" "$result" 2>/dev/null || true
+exit 1

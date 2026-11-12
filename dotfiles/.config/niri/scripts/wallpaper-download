@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+# 从随机壁纸 API 下载图片，校验、转成 PNG，再交给 DMS 设置为壁纸。
+# DMS 换壁纸后会自动重新生成 matugen 配色。
+#
+# 用法: wallpaper-download [-k] [-s] [-h]
+#   -k  保留旧壁纸，不自动清理
+#   -s  静默模式，不弹通知
+#   -h  显示帮助
+# 环境变量: WALLPAPER_API  覆盖随机壁纸 API 地址（默认 https://t.alcy.cc/pc/）
+set -uo pipefail
+
+API_URL="${WALLPAPER_API:-https://t.alcy.cc/pc/}"
+PICTURES_DIR=$(xdg-user-dir PICTURES 2>/dev/null) || PICTURES_DIR="$HOME/Pictures"
+SAVE_DIR="${PICTURES_DIR}/Wallpapers/api-random-download"
+KEEP_COUNT=40
+ENABLE_CLEANUP=true
+SILENT_MODE=false
+
+usage() {
+    cat <<'EOF'
+用法: wallpaper-download [-k] [-s] [-h]
+
+  -k  保留旧壁纸，不自动清理
+  -s  静默模式，不弹通知
+  -h  显示帮助
+EOF
+}
+
+while getopts "ksh" opt; do
+    case "${opt}" in
+        k) ENABLE_CLEANUP=false ;;
+        s) SILENT_MODE=true ;;
+        h)
+            usage
+            exit 0
+            ;;
+        *)
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+send_notify() {
+    if [ "${SILENT_MODE}" = false ] && command -v notify-send >/dev/null 2>&1; then
+        notify-send -a "wallpaper-download" "$1" "${2:-}"
+    fi
+}
+
+mkdir -p "${SAVE_DIR}"
+TIMESTAMP="$(date +%s%N)"
+RAW_PATH=$(mktemp "${SAVE_DIR}/.wall_${TIMESTAMP}.XXXXXX") || exit 1
+FINAL_PATH="${SAVE_DIR}/wall_${TIMESTAMP}.png"
+trap 'rm -f -- "$RAW_PATH"' EXIT
+
+send_notify "随机壁纸" "正在下载…"
+
+USER_AGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+if ! curl -L -fsS -A "${USER_AGENT}" --connect-timeout 10 -m 120 -o "${RAW_PATH}" "${API_URL}"; then
+    rm -f "${RAW_PATH}"
+    send_notify "下载失败" "无法访问壁纸 API: ${API_URL}"
+    exit 1
+fi
+
+if [ ! -f "${RAW_PATH}" ] || [ "$(wc -c <"${RAW_PATH}")" -lt 20480 ]; then
+    rm -f "${RAW_PATH}"
+    send_notify "下载失败" "文件过小或内容无效"
+    exit 1
+fi
+
+HEADER=$(od -An -v -tx1 -N12 "${RAW_PATH}" | tr -d '[:space:]')
+case "${HEADER}" in
+    ffd8ff*) FORMAT=jpeg ;;
+    89504e470d0a1a0a*) FORMAT=png ;;
+    52494646????????57454250) FORMAT=webp ;;
+    474946383761*|474946383961*) FORMAT=gif ;;
+    *)
+        rm -f "${RAW_PATH}"
+        send_notify "下载失败" "返回内容不是支持的图片格式"
+        exit 1
+        ;;
+esac
+
+if ! magick "${FORMAT}:${RAW_PATH}[0]" "${FINAL_PATH}" 2>/dev/null; then
+    rm -f "${RAW_PATH}" "${FINAL_PATH}"
+    send_notify "转换失败" "无法将图片转换为 PNG"
+    exit 1
+fi
+rm -f "${RAW_PATH}"
+
+result=$(dms ipc call wallpaper set "${FINAL_PATH}" 2>&1) || true
+if [[ "$result" == *'Per-monitor mode enabled'* ]]; then
+    if output=$(niri msg -j focused-output | jq -er '.name'); then
+        result=$(dms ipc call wallpaper setFor "$output" "${FINAL_PATH}" 2>&1) || true
+    fi
+fi
+if [[ "$result" != SUCCESS:* ]]; then
+    send_notify "设置失败" "DMS 未能设置壁纸: ${FINAL_PATH}"
+    exit 1
+fi
+
+send_notify "壁纸已更新" "$(basename "${FINAL_PATH}")"
+
+if [ "${ENABLE_CLEANUP}" = true ]; then
+    find "${SAVE_DIR}" -maxdepth 1 -type f -name 'wall_*.png' -printf '%T@ %p\n' \
+        | sort -rn \
+        | tail -n +"$((KEEP_COUNT + 1))" \
+        | cut -d' ' -f2- \
+        | while IFS= read -r old; do
+            rm -f -- "${old}"
+        done
+fi

@@ -1,0 +1,32 @@
+[config]
+
+# 用户 matugen 模板（Dux Shell 每次换壁纸/主题时合并执行）。
+# 注意：DMS 用非常朴素的方式截取本文件的 config 段和模板段，
+# 因此 [config] 必须放在第一行，且注释里不要出现任何方括号表头写法。
+# dgop 的配色（~/.config/dgop/colors.json）由 DMS 内置模板生成，不用在这里重复。
+
+[templates.user-fuzzel]
+input_path = '~/.config/matugen/templates/fuzzel.ini'
+output_path = '~/.config/fuzzel/colors.ini'
+
+[templates.user-starship]
+input_path = '~/.config/matugen/templates/starship-colors.toml'
+output_path = '~/.config/starship.toml'
+
+[templates.user-yazi]
+input_path = '~/.config/matugen/templates/yazi-theme.toml'
+output_path = '~/.config/yazi/theme.toml'
+
+[templates.user-fastfetch]
+input_path = '~/.config/matugen/templates/fastfetch-config.jsonc'
+output_path = '~/.config/fastfetch/config.jsonc'
+
+[templates.user-cava]
+input_path = '~/.config/matugen/templates/cava-colors.ini'
+output_path = '~/.config/cava/themes/matugen'
+post_hook = 'pkill -USR2 -x cava 2>/dev/null || true'
+
+[templates.user-folder-icons]
+input_path = '~/.config/matugen/templates/folder-colors'
+output_path = '~/.cache/matugen/folder-colors'
+post_hook = 'bash "$HOME/.config/matugen/folder-icons.sh" "$HOME/.cache/matugen/folder-colors"'

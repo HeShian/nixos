@@ -1,11 +1,14 @@
+{ den, ... }:
 {
-  den.aspects.openssh.nixos.services.openssh = {
-    enable = true;
-    settings = {
-      PasswordAuthentication = true;
-      KbdInteractiveAuthentication = false;
-      PermitRootLogin = "no";
-      AllowUsers = [ "user-vm" ];
+  den.aspects.openssh = { host, ... }: {
+    nixos.services.openssh = {
+      enable = true;
+      settings = {
+        PasswordAuthentication = true;
+        KbdInteractiveAuthentication = false;
+        PermitRootLogin = "no";
+        AllowUsers = [ host.defaultUser ];
+      };
     };
   };
 }

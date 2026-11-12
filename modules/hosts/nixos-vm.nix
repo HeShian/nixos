@@ -1,6 +1,9 @@
 { den, ... }:
 {
-  den.hosts.x86_64-linux.nixos-vm.users.user-vm.classes = [ "user" "homeManager" ];
+  den.hosts.x86_64-linux.nixos-vm = {
+    defaultUser = "user-vm";
+    users.user-vm.classes = [ "user" "homeManager" ];
+  };
 
   den.aspects.nixos-vm = {
     includes = [
@@ -12,6 +15,8 @@
       den.aspects.networkmanager
       den.aspects.openssh
       den.aspects.desktop
+      # VM 内没有仓库克隆，直接链接 flake 源里的 dotfiles（构建时只读）
+      den.aspects.dotfiles-store
     ];
 
     nixos = { modulesPath, ... }: {
@@ -30,6 +35,7 @@
 
       home-manager.useGlobalPkgs = true;
       home-manager.useUserPackages = true;
+      home-manager.backupFileExtension = "hm-backup";
       system.stateVersion = "26.05";
     };
   };

@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+mode=${1:-}
+if [[ $mode == --kitty ]]; then
+    exec kitty --class niri-hotkey-menu --title "快捷键菜单" \
+        -o remember_window_size=no -o initial_window_width=90c -o initial_window_height=20c \
+        -- "$0" --fzf
+fi
+
+# Dux 解析当前 Niri 配置和 include，查询结果始终与正在维护的绑定一致。
+bindings=$(dms keybinds show niri | jq -r --arg mode "$mode" '
+    .modKey as $mod | .binds[][]
+    | select($mode != "--fzf" or .desc != "")
+    | "\(if $mode == "--fzf" then .key else (.key | sub("^Mod"; $mod)) end)\t\(if .desc == "" then .action else .desc end)"
+')
+
+if [[ $mode == --fzf ]]; then
+    column -t -s $'\t' <<< "$bindings" |
+        fzf --reverse --prompt='󰌌 快捷键: ' --info=hidden --border=none >/dev/null
+else
+    fuzzel --dmenu --prompt '快捷键 › ' <<< "$bindings"
+fi

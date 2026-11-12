@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Mod+Shift+S：标注图片。
+#   - 剪贴板里有图片：直接标注剪贴板图片；
+#   - 没有图片：退回区域截图（slurp）再标注，按 Esc 取消。
+# 之前直接 `wl-paste | satty -f -`，剪贴板里是文字时 satty 解析失败静默退出，
+# 看起来就像快捷键没反应。
+set -uo pipefail
+
+types=$(wl-paste --list-types 2>/dev/null || true)
+image_type=$(printf '%s\n' "$types" | grep -m1 '^image/')
+
+if [ -n "$image_type" ]; then
+  wl-paste --type "$image_type" | satty -f -
+  exit 0
+fi
+
+region=$(slurp 2>/dev/null) || exit 0
+grim -g "$region" - | satty -f -

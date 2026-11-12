@@ -1,0 +1,35 @@
+// 背景模糊（niri 26.04+）。
+// 顶层参数控制模糊质量；xray 只渲染一次模糊背景，性能开销低。
+blur {
+    passes 3
+    offset 3
+    noise 0.02
+    saturation 1.5
+}
+
+// 所有普通窗口都显示模糊背景（透过半透明窗口可见）
+window-rule {
+    background-effect {
+        xray true
+        blur true
+    }
+}
+
+// 浮动窗口同样使用 xray，避免实时模糊的高开销
+window-rule {
+    match is-floating=true
+    background-effect {
+        xray true
+        blur true
+    }
+}
+
+// fuzzel 作为 launcher 降级方案时，实时模糊 + 圆角
+layer-rule {
+    match namespace="^launcher$"
+    geometry-corner-radius 8
+    background-effect {
+        xray false
+        blur true
+    }
+}

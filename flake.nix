@@ -1,5 +1,5 @@
 {
-  description = "Den configuration for the nixos-vm QEMU guest";
+  description = "NixOS configuration for acer / nixos-vm (niri + Dux Shell)";
 
   inputs = {
     nixpkgs.url = "https://channels.nixos.org/nixos-unstable/nixexprs.tar.zst";
@@ -10,24 +10,17 @@
       url = "github:nix-community/home-manager/2c0c1f01521469cf0271180c453c79782d53c2f6";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    umbriel.url = "github:noctalia-dev/umbriel/ad46c7d14ca1f59f2874f3df74773f781fb39c80";
-    noctalia.url = "github:noctalia-dev/noctalia/76637f9d42fe55186f2251f53f2d31c924a55e38";
+    zen-browser = {
+      url = "git+https://github.com/0xc000022070/zen-browser-flake.git?ref=main";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
   };
 
-  nixConfig = {
-    extra-substituters = [
-      "https://umbriel.cachix.org"
-      "https://noctalia.cachix.org"
-    ];
-    extra-trusted-public-keys = [
-      "umbriel.cachix.org-1:JfNq/2yg2S6D6z4Z2dVSZrZlDPQTKtexB6GAVLD98nw="
-      "noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4="
-    ];
-  };
-
-  outputs = inputs:
+  outputs =
+    inputs@{ self, ... }:
     (inputs.nixpkgs.lib.evalModules {
-      specialArgs = { inherit inputs; };
+      specialArgs = { inherit inputs self; };
       modules = [
         inputs.den.flakeModule
         (inputs.import-tree ./modules)

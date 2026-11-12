@@ -1,0 +1,99 @@
+// ┌──────────────────────────────────────────────────────────────────────────┐
+// │ niri 主配置                                                                │
+// │ 本文件由 home-manager 软链到 ~/.config/niri/config.kdl                     │
+// │ 直接编辑保存即可，niri 会自动重载；DMS 生成的片段在 ~/.config/niri/dms/。  │
+// └──────────────────────────────────────────────────────────────────────────┘
+
+// 手写配置分片
+include "layout.kdl"
+include "animations.kdl"
+include "blur.kdl"
+include "windowrules.kdl"
+include "supertab.kdl"
+include "binds.kdl"
+include "outputs.kdl"
+
+// Dux Shell / matugen 运行时生成的片段（首次生成前不存在，用 optional 跳过）
+include optional=true "dms/binds.kdl"
+include optional=true "dms/outputs.kdl"
+include optional=true "dms/colors.kdl"
+include optional=true "dms/alttab.kdl"
+include optional=true "dms/cursor.kdl"
+include optional=true "dms/windowrules.kdl"
+// overview 背景：把 DMS 的模糊壁纸层放进 niri 的 backdrop
+include optional=true "dms/wpblur.kdl"
+
+// 截图保存位置（niri 自带截图 UI / Screenshot 键）
+screenshot-path "~/Pictures/Screenshots/Niri-screenshots/%Y-%m-%d_%H-%M-%S.png"
+
+// 由 niri 在 X11 客户端连接时启动。
+xwayland-satellite {
+    path "/run/current-system/sw/bin/xwayland-satellite"
+}
+
+environment {
+    LANG "zh_CN.UTF-8"
+    LANGUAGE "zh_CN:en"
+
+    // 输入法
+    XMODIFIERS "@im=fcitx"
+    QT_IM_MODULE "fcitx"
+    QT_IM_MODULES "wayland;fcitx"
+    SDL_IM_MODULE "fcitx"
+    GTK_IM_MODULE "fcitx"
+
+    // 图标主题不在这里写 QS_ICON_THEME：
+    // Dux Shell 2.x 的 IconThemeService 在 QS_ICON_THEME 存在时会跳过系统主题探测，
+    // 图标主题改由 GSettings（dconf）提供。
+
+    // 默认程序
+    EDITOR "nvim"
+    TERMINAL "kitty"
+
+    // Intel + NVIDIA 双显卡时，GTK4 应用启动慢可取消注释（xray 模糊在部分驱动上也可能受影响）
+    //GSK_RENDERER "gl"
+}
+
+input {
+    keyboard {
+        repeat-delay 250
+        repeat-rate 35
+    }
+
+    touchpad {
+        tap
+        natural-scroll
+    }
+
+    mouse {
+        accel-speed -0.15
+        accel-profile "flat"
+    }
+
+    trackpoint {
+    }
+}
+
+// 光标；DMS 的光标设置会写 dms/cursor.kdl，在文件末尾 include，优先级更高
+// 这里显式指定已安装的 Bibata 主题，避免 XCURSOR_THEME=default 导致找不到光标
+cursor {
+    xcursor-theme "Bibata-Modern-Ice"
+    xcursor-size 24
+    hide-after-inactive-ms 15000
+}
+
+// 启动时隐藏 Niri 自带的“Important Hotkeys”教程
+hotkey-overlay {
+    skip-at-startup
+}
+
+// 隐藏窗口自带标题栏，边框/圆角由 niri 绘制
+prefer-no-csd
+
+// 截图音效守护进程：快捷键先标记截图，剪贴板收到图片后播放快门声
+spawn-at-startup "~/.config/niri/scripts/screenshot-sound.sh"
+
+// 放宽焦点拦截，修复点击托盘程序无法聚焦的问题
+debug {
+    honor-xdg-activation-with-invalid-serial
+}

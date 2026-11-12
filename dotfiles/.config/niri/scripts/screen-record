@@ -1,0 +1,132 @@
+#!/usr/bin/env bash
+# Mod+F3 打开录屏菜单，Mod+Alt+F3 直接选择区域。再次执行停止。
+set -euo pipefail
+
+usage() {
+    printf '用法: screen-record [--menu | --region | --monitor | --output NAME] [--audio] [--software]\n'
+}
+
+scope=region
+with_audio=false
+software=false
+output=
+while (($#)); do
+    case "$1" in
+        --menu) scope=menu ;;
+        --region) scope=region ;;
+        --monitor) scope=monitor ;;
+        --output)
+            if (($# < 2)) || [[ -z "$2" ]]; then usage >&2; exit 2; fi
+            scope=output
+            output=$2
+            shift
+            ;;
+        --audio) with_audio=true ;;
+        --software) software=true ;;
+        -h|--help) usage; exit 0 ;;
+        *) usage >&2; exit 2 ;;
+    esac
+    shift
+done
+
+notify() {
+    notify-send -a "screen-record" "$1" "${2:-}" || true
+}
+
+process_start() {
+    local stat fields
+    stat=$(cat "/proc/$1/stat" 2>/dev/null) || return 1
+    read -ra fields <<< "${stat##*) }"
+    [[ -n "${fields[19]:-}" ]] || return 1
+    printf '%s\n' "${fields[19]}"
+}
+
+runtime=${XDG_RUNTIME_DIR:?录屏需要 Wayland 用户会话}
+state="$runtime/niri-screenrecord.pid"
+log="$runtime/niri-screenrecord.log"
+exec 9>"$runtime/niri-screenrecord.lock"
+flock -n 9 || exit 0
+
+if [[ -s "$state" ]]; then
+    read -r pid started < "$state" || true
+    if [[ "$pid" =~ ^[0-9]+$ && -n "$started" && $(process_start "$pid") == "$started" ]]; then
+        kill -INT "$pid" 2>/dev/null || true
+        exit 0
+    fi
+    rm -f "$state"
+fi
+
+if [[ "$scope" == menu ]]; then
+    choice=$(fuzzel --dmenu --index --prompt '录屏 › ' 9>&- <<'MENU'
+区域
+区域 + 系统声音
+显示器
+显示器 + 系统声音
+MENU
+    ) || exit 0
+    case "$choice" in
+        0) scope=region ;;
+        1) scope=region; with_audio=true ;;
+        2) scope=monitor ;;
+        3) scope=monitor; with_audio=true ;;
+        *) exit 0 ;;
+    esac
+fi
+
+case "$scope" in
+    region)
+        geometry_pattern='^-?[0-9]+,-?[0-9]+ ([0-9]+)x([0-9]+)$'
+        while true; do
+            geometry=$(slurp -d -c '#91b9ffff' -w 3 9>&-) || exit 0
+            [[ "$geometry" =~ $geometry_pattern ]] || exit 0
+            if ((10#${BASH_REMATCH[1]} >= 16 && 10#${BASH_REMATCH[2]} >= 16)); then
+                break
+            fi
+            notify '选区太小' '请拖动鼠标，选择至少 16 × 16 的区域。按 Esc 取消。'
+        done
+        capture=(--geometry "$geometry")
+        ;;
+    monitor)
+        output=$(slurp -o -f '%o' 9>&-) || exit 0
+        [[ -n "$output" ]] || exit 0
+        capture=(--output "$output")
+        ;;
+    output) capture=(--output "$output") ;;
+esac
+
+if $with_audio; then
+    if ! sink=$(wpctl inspect @DEFAULT_AUDIO_SINK@ | sed -n 's/^[[:space:]*]*node\.name = "\([^"]*\)"$/\1/p') || [[ -z "$sink" ]]; then
+        notify '录屏失败' '找不到系统音频输出'
+        exit 1
+    fi
+    capture+=(--audio --audio-device "${sink}.monitor")
+fi
+if $software; then capture+=(--no-hw); fi
+
+videos_dir=$(xdg-user-dir VIDEOS)
+recordings_dir="$videos_dir/Recordings"
+mkdir -p "$recordings_dir"
+file="$recordings_dir/$(date +%Y-%m-%d_%H-%M-%S_%N).mp4"
+wl-screenrec "${capture[@]}" --codec avc --filename "$file" > "$log" 2>&1 9>&- &
+pid=$!
+started=$(process_start "$pid") || started=
+printf '%s %s\n' "$pid" "$started" > "$state"
+flock -u 9
+sleep 0.3
+if [[ -n "$started" && $(process_start "$pid") == "$started" ]]; then
+    notify '录屏' "开始录制：${file##*/}"
+fi
+
+status=0
+wait "$pid" || status=$?
+flock 9
+if [[ $(cat "$state" 2>/dev/null || true) == "$pid $started" ]]; then rm -f "$state"; fi
+flock -u 9
+
+if ((status == 0)) && [[ -s "$file" ]]; then
+    notify '录屏' "已保存：${file##*/}"
+else
+    if [[ -f "$file" && ! -s "$file" ]]; then rm -f -- "$file"; fi
+    notify '录屏失败' "详情：$log"
+    exit 1
+fi

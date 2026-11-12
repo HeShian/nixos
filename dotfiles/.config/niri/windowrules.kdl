@@ -1,0 +1,155 @@
+// 窗口规则：参考 shorin-dux-niri 的 shorin-windowrules.kdl / noctalia 规则整理。
+// 注意：DMS 的“创建窗口规则”UI 会写 ~/.config/niri/dms/windowrules.kdl，
+// 该文件在 config.kdl 末尾被 include，因此 DMS 新建的规则优先生效。
+
+// ── 全局：默认平铺 ─────────────────────────────────────────────────────────
+// niri 默认平铺，但会把“有 parent 的窗口（对话框）/ 固定高度窗口”自动浮动。
+// 这条强制所有窗口先按平铺处理，下面各条 open-floating true 的规则再逐个豁免。
+// 注意：niri 的多条 match 是“或”关系；需要同时匹配 app-id+title 时必须写在同一行，
+// 否则会把该 app 的所有窗口都当成例外（之前 Firefox/PiP 规则就是这么写错的）。
+window-rule {
+    open-floating false
+}
+
+// ── 全局：圆角 + 裁剪 ───────────────────────────────────────────────────────
+window-rule {
+    geometry-corner-radius 8
+    clip-to-geometry true
+    draw-border-with-background false
+}
+
+// ── Dux Shell 自身窗口（设置 / 记事本）────────────────────────────────────
+// 屏幕 1920×1080 @1.25 → 逻辑 1536×864，设置窗口高度必须小于可用高度，
+// 否则会被屏幕底边裁掉（底部内容看不全）。
+window-rule {
+    match app-id=r#"^dev\.duxlabs\.shell$"#
+    open-floating true
+    default-column-width { fixed 1020; }
+    default-window-height { fixed 780; }
+}
+
+window-rule {
+    match app-id=r#"^dev\.duxlabs\.shell\.notepad$"#
+    open-floating true
+    default-column-width { fixed 720; }
+    default-window-height { fixed 820; }
+}
+
+// ── 常用浮动工具 ────────────────────────────────────────────────────────────
+window-rule {
+    match app-id=r#"^(imv|galculator|blueman-manager|nm-connection-editor|pavucontrol|waypaper)$"#
+    match app-id=r#"^(org\.gnome\.Calculator|org\.pulseaudio\.pavucontrol|com\.gabm\.satty)$"#
+    match app-id=r#"^(org\.gnome\.TextEditor|org\.gnome\.Console|org\.gnome\.Disks)$"#
+    match app-id="^niri-hotkey-menu$"
+    open-floating true
+}
+
+// 浮动终端（Mod+Slash）
+window-rule {
+    match app-id=r#"^quickterminal$"#
+    open-floating true
+    default-floating-position x=20 y=20 relative-to="top-left"
+    default-column-width { fixed 900; }
+    default-window-height { fixed 600; }
+}
+
+
+// ── 画中画：右下角、不透明、不聚焦 ─────────────────────────────────────────
+window-rule {
+    match app-id=r#"^(zen|zen-beta|app\.zen_browser\.zen|firefox|org\.mozilla\.firefox|brave-browser|com\.brave\.Browser|chromium|google-chrome)$"# title=r#"^(Picture-in-Picture|Picture-in-picture|Picture in picture|画中画)$"#
+    open-floating true
+    open-focused false
+    default-floating-position x=20 y=20 relative-to="bottom-right"
+    opacity 1.0
+}
+
+// ── Dux Files 主窗口：Mod+E 打开时沿用当前浮窗尺寸（897×543） ───────────────
+// 这条规则对所有 dfiles 窗口生效；Mod+Alt+E 由 dfiles-tiled 脚本在打开后切回平铺。
+window-rule {
+    match app-id=r#"^dev\.duxlabs\.files$"#
+    open-floating true
+    default-column-width { fixed 897; }
+    default-window-height { fixed 543; }
+}
+
+// ── Dux Files 的 portal 文件对话框：浮动 ────────────────────────────────────
+// 对话框带着调用方的 app-id 和 Open/Save 之类的标题，见 dux files 的 Desktop Integration。
+window-rule {
+    match app-id=r#"^dev\.duxlabs\.files$"# title=r#"^(Open|Save|Select|Upload|Export|Import)"#
+    open-floating true
+}
+
+// ── Steam ───────────────────────────────────────────────────────────────────
+window-rule {
+    match app-id=r#"^steam$"# title=r#"^(Friends List|好友列表)$"#
+    default-column-width { proportion 0.22; }
+}
+
+window-rule {
+    match app-id=r#"^steam$"# title=r#"^notificationtoasts_\d+_desktop$"#
+    open-floating true
+    open-focused false
+    default-floating-position x=10 y=10 relative-to="bottom-right"
+}
+
+// ── 视频 / 图片：不透明 ─────────────────────────────────────────────────────
+window-rule {
+    match app-id=r#"^(mpv|celluloid|io\.github\.celluloid_player\.Celluloid|imv)$"#
+    opacity 1.0
+}
+
+window-rule {
+    match title=r#"^(图片查看器|图片和视频|视频播放器)$"#
+    open-floating true
+    opacity 1.0
+}
+
+// ── GNOME 应用统一圆角 ──────────────────────────────────────────────────────
+window-rule {
+    match app-id=r#"^org\.gnome\."#
+    geometry-corner-radius 12
+}
+
+// ── 终端类窗口开启背景模糊 ──────────────────────────────────────────────────
+window-rule {
+    match app-id=r#"^(kitty|quickterminal|Alacritty|com\.mitchellh\.ghostty|org\.wezfurlong\.wezterm|foot)$"#
+    background-effect {
+        xray true
+        blur true
+    }
+}
+
+// ── QQ / 微信的浮动子窗口 ───────────────────────────────────────────────────
+window-rule {
+    match app-id=r#"^(QQ|linuxqq|com\.tencent\.QQ)$"# title=r#"^(资料卡|天气|群聊的聊天记录|聊天记录|群相册|日历|另存为)$"#
+    open-floating true
+}
+
+window-rule {
+    match app-id=r#"^(QQ|linuxqq|com\.tencent\.QQ)$"# title=r#"^(资料卡|天气)$"#
+    open-focused false
+}
+
+window-rule {
+    match app-id=r#"^(com\.tencent\.WeChat|wechat|WeChat)$"#
+    open-floating true
+}
+
+// ── Waydroid 全屏 ───────────────────────────────────────────────────────────
+window-rule {
+    match app-id=r#"^waydroid$"#
+    open-fullscreen true
+    open-floating true
+}
+
+// ── 输入法候选窗 ────────────────────────────────────────────────────────────
+window-rule {
+    match app-id=r#"^(fcitx|fcitx5)$"#
+    open-floating true
+}
+
+// ── DMS overview 壁纸层：放进 backdrop ──────────────────────────────────────
+layer-rule {
+    match namespace="dms:blurwallpaper"
+    place-within-backdrop true
+}
