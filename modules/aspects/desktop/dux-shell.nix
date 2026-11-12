@@ -35,6 +35,8 @@
         enable = true;
         systemd.enable = true;
       };
+      # 同一个坑：dcal 也会按桌面项的 Exec 名唤起程序，最小 PATH 让 exec 失败。
+      systemd.user.services.dcal.enableDefaultPath = false;
 
       # nixpkgs 的 programs.niri 默认把 FileChooser 交给 gtk；
       # 这里改成 dfiles 优先、gtk 兜底（Flatpak / Firefox / Chromium 的对话框走这里）。
