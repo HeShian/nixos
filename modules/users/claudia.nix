@@ -1,25 +1,20 @@
 { den, ... }:
 {
   den.aspects.claudia = {
-    includes = [ den.batteries.define-user den.batteries.host-aspects ];
+    # define-user：OS 账户 + home 路径；host-aspects：把 host 的共享配置带进来；
+    # primary-user：wheel + networkmanager 组；user-shell：登录 shell 与对应程序。
+    includes = [
+      den.batteries.define-user
+      den.batteries.host-aspects
+      den.batteries.primary-user
+      (den.batteries.user-shell "fish")
+    ];
 
-    user = {
-      description = "claudia";
-      extraGroups = [ "wheel" "networkmanager" ];
-    };
+    user.description = "claudia";
 
-    # fish 由 dotfiles 里的 config.fish 配置；这里只把它设为登录 shell。
-    nixos = { pkgs, ... }: {
-      programs.fish.enable = true;
-      users.users.claudia.shell = pkgs.fish;
-    };
-
-    homeManager = {
-      home.stateVersion = "26.05";
-      programs.git.settings.user = {
-        name = "claudia";
-        email = "96305135+HeShian@users.noreply.github.com";
-      };
+    homeManager.programs.git.settings.user = {
+      name = "claudia";
+      email = "96305135+HeShian@users.noreply.github.com";
     };
   };
 }

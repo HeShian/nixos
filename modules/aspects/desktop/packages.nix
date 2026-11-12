@@ -1,10 +1,12 @@
-{ inputs, ... }:
+{ inputs, den, ... }:
 {
   # 用户级软件集合：装什么、允许哪些 unfree、Steam 开关。
   # 应用与桌面的「接线」（默认程序、扩展、主题联动）分别在 mimeapps / app-integrations。
   den.aspects.desktop-packages = {
-    nixos = { lib, ... }: {
-      nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
+    # 不自由软件白名单。Den 的 unfree battery 生成等价的
+    # `nixpkgs.config.allowUnfreePredicate`，并同时覆盖 host 与 home 两个 class。
+    includes = [
+      (den.batteries.unfree [
         "chatgpt"
         "vscode"
         "obsidian"
@@ -20,10 +22,10 @@
         "nvidia-settings"
         "nvidia-modprobe"
         "nvidia-persistenced"
-      ];
+      ])
+    ];
 
-      programs.steam.enable = true;
-    };
+    nixos.programs.steam.enable = true;
 
     homeManager = { pkgs, ... }:
     let
