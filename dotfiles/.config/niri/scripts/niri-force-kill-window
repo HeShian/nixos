@@ -94,7 +94,10 @@ notify_and_play() {
     local title="$1" msg="$2"
     notify-send "$title" "$msg" -a "Window Killer" -i application-exit
     if command -v pw-play &> /dev/null; then
-        pw-play /usr/share/sounds/freedesktop/stereo/dialog-error.oga >/dev/null 2>&1 &
+        # NixOS 没有 /usr/share；先试系统 profile，再试用户 profile
+        local sound=/run/current-system/sw/share/sounds/freedesktop/stereo/dialog-error.oga
+        [[ -r $sound ]] || sound="$HOME/.nix-profile/share/sounds/freedesktop/stereo/dialog-error.oga"
+        [[ -r $sound ]] && pw-play "$sound" >/dev/null 2>&1 &
     fi
 }
 
