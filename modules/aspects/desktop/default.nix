@@ -7,10 +7,15 @@
     niri
     dux-shell
     dux-greeter
-    desktop-appearance
-    desktop-applications
+    desktop-appearance-seed
+    desktop-gtk-legacy
+    desktop-appearance-settings
+    desktop-packages
+    desktop-mimeapps
+    desktop-app-integrations
     desktop-terminal
-    desktop-localization
+    desktop-locale
+    desktop-input-method
     xdg-user-dirs
     desktop-fonts
     desktop-audio
