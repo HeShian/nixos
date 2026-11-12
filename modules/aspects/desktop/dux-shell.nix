@@ -1,5 +1,5 @@
 {
-  # Dux 生态：DMS + Dux Search + Dux Files + Dux Calendar（Dux Greeter 在 greeter.nix）。
+  # Dux 生态：DMS + Dux Search + Dux Files + Dux Calendar（Dux Greeter 在 dux-greeter.nix）。
   # nixpkgs 的 programs.dux-shell 模块提供：
   #   - dms.service（WantedBy=graphical-session.target）
   #   - dux-shell / quickshell / matugen / cava 进系统 PATH
