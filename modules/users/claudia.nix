@@ -14,9 +14,8 @@
       users.users.claudia.shell = pkgs.fish;
     };
 
-    homeManager = { pkgs, ... }: {
+    homeManager = {
       home.stateVersion = "26.05";
-      home.packages = [ (pkgs.callPackage ../../packages/dsh-desktop.nix { }) ];
       programs.git.settings.user = {
         name = "claudia";
         email = "96305135+HeShian@users.noreply.github.com";
