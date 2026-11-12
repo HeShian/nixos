@@ -56,11 +56,11 @@ DMS 和 matugen 会覆盖这些文件：
 - `~/.config/dgop/colors.json`（Dux GOP 的系统监视器配色）
 - `~/.config/dms/*.json`、`~/.local/state/dms/session.json`
 
-首次登录前这些文件可能不存在；`appearance.nix` 只为 `kitty/dank-theme.conf`、`kitty/dank-tabs.conf`、`fuzzel/colors.ini` 建空占位（避免 include 失败），其余在 DMS 首次生成配色后才有。
+首次登录前这些文件可能不存在；`appearance-seed.nix` 只为 `kitty/dank-theme.conf`、`kitty/dank-tabs.conf`、`fuzzel/colors.ini` 建空占位（避免 include 失败），其余在 DMS 首次生成配色后才有。
 
 ## 脚本
 
-脚本以 `~/.config/niri/scripts/<name>` 调用（niri 会展开 `~`）。依赖分散在多处：`applications.nix`（jq/fuzzel/fzf/slurp/grim/wl-screenrec/wl-clipboard/satty/libnotify/imagemagick 等）、`system/tools.nix`（curl/git），`dms`/`dfiles`/`pw-play` 来自系统服务与系统包：
+脚本以 `~/.config/niri/scripts/<name>` 调用（niri 会展开 `~`）。依赖分散在多处：`packages.nix`（jq/fuzzel/fzf/slurp/grim/wl-screenrec/wl-clipboard/satty/libnotify/imagemagick 等）、`system/tools.nix`（curl/git），`dms`/`dfiles`/`pw-play` 来自系统服务与系统包：
 
 - `screenshot-sound.sh`：由 `spawn-at-startup` 启动；截图快捷键先标记截图，剪贴板收到图片后播放快门声。
 - `niri-pick`：`Mod+P`，复制窗口信息。

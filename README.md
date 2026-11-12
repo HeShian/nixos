@@ -51,11 +51,11 @@ nixos-rebuild build --flake .#nixos-vm
 - **显示器**：改 `dotfiles/.config/niri/outputs.kdl`（不要用 DMS 的显示设置页，那里写的文件没有 include）。
 - **默认程序 / shell 配置**：`dotfiles/.config/kitty/kitty.conf`、`dotfiles/.config/fish/config.fish`。
 - **配色**：DMS 按壁纸生成；额外应用模板在 `dotfiles/.config/matugen/`，换壁纸后自动执行。
-- **软件包**：`modules/aspects/desktop/applications.nix`（大部分用户包）、`terminal.nix`（终端）、`system/development-tools.nix`（开发工具）、`system/tools.nix`（系统工具 curl/git/nh）、`dux-shell.nix`（Dux 相关系统包）；字体在 `fonts.nix`。
+- **软件包**：`modules/aspects/desktop/packages.nix`（大部分用户包）、`terminal.nix`（终端）、`system/development-tools.nix`（开发工具）、`system/tools.nix`（系统工具 curl/git/nh）、`dux-shell.nix`（Dux 相关系统包）；字体在 `fonts.nix`。
 - **录屏**：`Mod+F3` 打开菜单，可选择区域、显示器和系统声音；`Mod+Alt+F3` 直接选区。录制中再次按下任一快捷键停止。文件保存在 XDG 视频目录的 `Recordings/`。
 - **文件管理**：`Mod+E` 打开 Dux Files，`Mod+Alt+E` 打开并平铺窗口。Dux Files 也负责打开和保存对话框。
 - **快捷键查询**：`Mod+Shift+/` 查看 Niri 内置帮助，`Mod+Ctrl+/` 搜索当前绑定。
-- **壁纸**：登录后 DMS 里选择；首启默认壁纸由 `modules/aspects/desktop/appearance.nix` 种下。
+- **壁纸**：登录后 DMS 里选择；首启默认壁纸由 `modules/aspects/desktop/appearance-seed.nix` 种下。
 
 ## 主题 / 图标 / 光标
 
@@ -65,29 +65,29 @@ nixos-rebuild build --flake .#nixos-vm
 - 光标的值出现在五处、各管一个作用域：niri `cursor {}`（合成器）、HM 会话变量 `XCURSOR_*`（systemd 用户服务等
   非 niri 子进程）、dconf（GTK）、DMS `settings.json` 种子（DMS 界面初始值）、Dux Greeter 的 compositor 配置
   （登录界面）。改光标时五处要一起改。
-- DMS 的图标/光标默认值由 `appearance.nix` 首次写入 `~/.config/dms/settings.json`；之后可在 DMS 设置里改。
+- DMS 的图标/光标默认值由 `appearance-seed.nix` 首次写入 `~/.config/dms/settings.json`；之后可在 DMS 设置里改。
 - 旧桌面留下的 `gtk.css`（`@import noctalia.css`）和失效的 `breeze` / `breeze_cursors`
   会在 HM 激活时自动备份到 `~/.cache/nixos-migration-backup/` 并替换为 Papirus/Bibata。
 - fcitx5 主题：DMS 的 matugen 会生成 `~/.local/share/fcitx5/themes/dms`，系统配置写 `Theme=dms`；
   DMS 生成主题后通过 D-Bus 重载 classicui（手动重启：`pkill fcitx5; fcitx5 -d` 或 `Mod+F1`）。
 - GTK 3/4 的用户样式导入 Dux 生成的 `dank-colors.css`。CAVA 使用 Matugen 生成的主题。
-- VS Code 的 `Dynamic Base16 DankShell` 扩展由 `appearance.nix` 的激活脚本执行 `vscode --install-extension` 装到可写扩展目录（不是 Home Manager 直接装包），Dux 随壁纸更新配色。已有 VS Code 用户设置可在主题菜单选用此主题。
+- VS Code 的 `Dynamic Base16 DankShell` 扩展由 `appearance-settings.nix` 的激活脚本执行 `vscode --install-extension` 装到可写扩展目录（不是 Home Manager 直接装包），Dux 随壁纸更新配色。已有 VS Code 用户设置可在主题菜单选用此主题。
 - Fish 中的 `f` 用本地壁纸为 Kitty 中的 Fastfetch 更换图标，`fwatch` 定时刷新，`raw` 下载随机壁纸。
 - `dotfiles/.config/matugen/config.toml` 的第一行必须是 `[config]`，注释里不要出现
   `[config]` / `[templates...]` 字面量，否则 DMS 截取配置时会生成非法 TOML。
-- **Overview（Mod+O / Mod+G）的暗色模糊壁纸**：`appearance.nix` 首次把 `blurredWallpaperLayer=true`
+- **Overview（Mod+O / Mod+G）的暗色模糊壁纸**：`appearance-seed.nix` 首次把 `blurredWallpaperLayer=true`
   写进 DMS 设置；`dotfiles/.config/niri/windowrules.kdl` 里的
   `layer-rule { match namespace="dms:blurwallpaper"; place-within-backdrop true }` 把它放进 overview 的 backdrop。
   `dotfiles/.config/niri/config.kdl` 另外 `include optional=true "dms/wpblur.kdl"`（该文件由 DMS 生成，仓库里没有）。
 
 ## DMS 运行时状态
 
-以下文件由 DMS / matugen / `appearance.nix` 写入，**不要软链/手改**（DMS 使用原子写，会替换符号链接）：
+以下文件由 DMS / matugen / `appearance-seed.nix` 与 `appearance-settings.nix` 写入，**不要软链/手改**（DMS 使用原子写，会替换符号链接）：
 
 - `~/.config/dms/settings.json`、`clsettings.json`
 - `~/.local/state/dms/session.json`
 - `~/.config/niri/dms/` 下的 `binds.kdl`、`outputs.kdl`、`colors.kdl`、`alttab.kdl`、`cursor.kdl`、`windowrules.kdl`、`wpblur.kdl`（由 `config.kdl` 可选 include）
-- `~/.vscode/extensions/` 的 DankShell 扩展与 `~/.config/Code/User/settings.json`（由 `appearance.nix` 激活时写入）
+- `~/.vscode/extensions/` 的 DankShell 扩展与 `~/.config/Code/User/settings.json`（由 `appearance-settings.nix` 激活时写入）
 - `~/.config/kitty/dank-theme.conf`、`dank-tabs.conf`
 - `~/.config/fuzzel/colors.ini`、`~/.config/starship.toml`、`~/.config/yazi/theme.toml`、`~/.config/fastfetch/config.jsonc`、`~/.config/dgop/colors.json`
 - `~/.config/cava/themes/matugen`、`~/.config/gtk-{3,4}.0/dank-colors.css`、VS Code 的 DankShell 扩展主题文件
