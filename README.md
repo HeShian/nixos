@@ -10,10 +10,12 @@ dotfiles/                         # 经常改的纯文本配置（活链接源�
   .config/niri/                   # niri：config / binds / windowrules / layout / animations / blur / supertab / outputs / scripts
   .config/{kitty,fish,fuzzel,mpv,satty,cava,fontconfig,matugen}/
 modules/
+  defaults.nix                    # den.default / den.schema：所有 host/user/home 的全局默认
   aspects/desktop/                # 桌面相关 aspect（NixOS + HM）
   aspects/system|network/         # 系统、网络
   hosts/                          # acer / nixos-vm
   users/                          # claudia / user-vm
+  _lib/                           # 非 aspect 的辅助函数（import-tree 忽略 _ 前缀）
 ```
 
 职责划分：

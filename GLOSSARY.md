@@ -18,6 +18,18 @@ _Avoid_: 账号、账户
 按关注点切分的配置单元，可被其它 aspect 通过 includes 组合，并能同时给出系统层与用户层的内容。
 _Avoid_: 模块、组件、feature
 
+**Entity**：
+Den 的强类型数据记录（host / user / home），声明在 `den.hosts` 之类的位置；aspect 的 context 参数就是实体。
+_Avoid_: 对象、记录
+
+**Battery**：
+Den 自带的可复用 aspect 提供者（`den.batteries.*`），要显式 include 才生效，用来替代手写的同类配置。
+_Avoid_: 插件、工具
+
+**全局默认（den.default）**：
+写在 `den.default` 里的设置，Den 会自动注入每一种实体，因此对所有 host / user / home 成立，不需要任何文件 include。
+_Avoid_: 公共模块、base
+
 ### 配置归属
 
 **Dotfile**：
