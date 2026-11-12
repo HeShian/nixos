@@ -8,7 +8,7 @@
 # 本文件在 modules/_lib/ 下，import-tree 会忽略带 "/_" 的路径，
 # 所以它不会被当成 aspect 自动加载，只供 dotfiles-live / dotfiles-store 相对导入。
 root:
-{ config, ... }:
+{ config, lib, ... }:
 let
   dotfiles = "${root}/.config";
   link = path: {
@@ -30,7 +30,7 @@ in
 
     # 终端 / 常用应用
     "kitty/kitty.conf" = link "kitty/kitty.conf";
-    "fish/config.fish" = link "fish/config.fish";
+    "fish/config.fish" = lib.mkForce (link "fish/config.fish");
     "fish/functions/f.fish" = link "fish/functions/f.fish";
     "fish/functions/fwatch.fish" = link "fish/functions/fwatch.fish";
     "fuzzel/fuzzel.ini" = link "fuzzel/fuzzel.ini";
