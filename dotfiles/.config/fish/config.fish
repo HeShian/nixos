@@ -16,8 +16,10 @@ if status is-interactive
     starship init fish | source
     zoxide init fish --cmd cd | source
 
-    abbr -a nrs 'sudo nixos-rebuild switch --flake ~/nixos#acer'
-    abbr -a nrb 'sudo nixos-rebuild build --flake ~/nixos#acer'
+    # 主机名由 den.batteries.hostname 设成 den.hosts.<name>（acer / nixos-vm），
+    # 与 flake 属性同名，所以用 (hostname) 自动选对 host。
+    abbr -a nrs 'sudo nixos-rebuild switch --flake ~/nixos#(hostname)'
+    abbr -a nrb 'sudo nixos-rebuild build --flake ~/nixos#(hostname)'
     abbr -a nfu 'nix flake update'
     abbr -a nfc 'nix flake check'
     abbr -a fa fastfetch
