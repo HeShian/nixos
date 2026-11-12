@@ -21,9 +21,6 @@
     inputs@{ self, ... }:
     (inputs.nixpkgs.lib.evalModules {
       specialArgs = { inherit inputs self; };
-      modules = [
-        inputs.den.flakeModule
-        (inputs.import-tree ./modules)
-      ];
+      modules = [ (inputs.import-tree ./modules) ];
     }).config.flake;
 }

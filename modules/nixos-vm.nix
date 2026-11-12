@@ -1,10 +1,5 @@
 { den, ... }:
 {
-  den.hosts.x86_64-linux.nixos-vm = {
-    defaultUser = "user-vm";
-    users.user-vm = { };
-  };
-
   den.aspects.nixos-vm = {
     includes = [
       den.batteries.hostname

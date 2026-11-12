@@ -9,12 +9,16 @@ flake.nix                         # flake 输入与 Den 求值
 dotfiles/                         # 经常改的纯文本配置（活链接源）
   .config/niri/                   # niri：config / binds / windowrules / layout / animations / blur / supertab / outputs / scripts
   .config/{kitty,fish,fuzzel,mpv,satty,cava,fontconfig,matugen}/
-modules/
-  defaults.nix                    # den.default / den.schema：所有 host/user/home 的全局默认
-  aspects/desktop/                # 桌面相关 aspect（NixOS + HM）
-  aspects/system|network/         # 系统、网络
-  hosts/                          # acer / nixos-vm
-  users/                          # claudia / user-vm
+modules/                          # 全部扁平：一个文件一个 aspect，文件名 = aspect 名
+  dendritic.nix                   # Den 的 flake 集成入口
+  hosts.nix                       # 所有 host / user 声明
+  defaults.nix                    # den.default / den.schema：所有实体的全局默认
+  acer.nix / nixos-vm.nix         # host aspect：硬件 + 引入哪些 aspect + dotfiles 链接方式
+  claudia.nix / user-vm.nix       # user aspect：身份与 git
+  desktop.nix                     # 桌面聚合（includes）
+  desktop-*.nix dux-*.nix niri.nix …   # 桌面关注点
+  system-*.nix gpu.nix …          # 系统关注点
+  networkmanager.nix openssh.nix proxy.nix
   _lib/                           # 非 aspect 的辅助函数（import-tree 忽略 _ 前缀）
 ```
 
