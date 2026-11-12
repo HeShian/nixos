@@ -5,7 +5,7 @@
   #   - dux-shell / quickshell / matugen / cava 进系统 PATH
   #   - hardware.graphics / hardware.i2c / accounts-daemon
   den.aspects.dux-shell = {
-    nixos = { config, pkgs, lib, ... }: {
+    nixos = { config, lib, ... }: {
       programs.dux-shell.enable = true;
       programs.dux-search.enable = true; # 文件索引：dfiles 内容搜索 / DMS 启动器
 
@@ -48,27 +48,8 @@
         "gtk"
       ];
 
-      # DMS 的电池 / 电源模式 / 蓝牙 / 文件挂载组件
-      services.upower.enable = true;
-      services.power-profiles-daemon.enable = true;
-      services.gvfs.enable = true;
-      services.udisks2.enable = true;
-
-      hardware.bluetooth.enable = true;
-      hardware.bluetooth.powerOnBoot = true;
-
-      # 放在系统 profile 而不是 HM，因为：
-      #   - Dux Greeter 以 dms-greeter 用户运行，看不到 claudia 的 HM 包；
-      #   - DMS 的图标/光标探测会调用 gsettings（glib），并扫描 XDG_DATA_DIRS 里的图标主题；
-      #   - DMS 的系统监视器/任务管理器会调用 dgop，dms.service 的 PATH 需要能找到它。
-      environment.systemPackages = with pkgs; [
-        glib # gsettings / gio
-        adwaita-icon-theme
-        hicolor-icon-theme
-        papirus-icon-theme # Papirus-Dark，DMS/GTK 图标主题
-        bibata-cursors # Bibata-Modern-Ice，光标主题
-        dux-gop # dgop：DMS 的系统监视器数据源；终端里 `dgop top` 替代 btop
-      ];
+      # 系统级服务（upower / power-profiles-daemon / gvfs / udisks2 / 蓝牙）
+      # 与系统 profile 的图标、光标、glib 包已移到 system-services aspect。
     };
   };
 }

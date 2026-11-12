@@ -10,6 +10,7 @@
       den.batteries.hostname
       den.aspects.system-defaults
       den.aspects.system-tools
+      den.aspects.system-services
       den.aspects.development-tools
       den.aspects.qemu-guest
       den.aspects.networkmanager
