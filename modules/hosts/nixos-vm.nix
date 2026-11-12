@@ -2,13 +2,12 @@
 {
   den.hosts.x86_64-linux.nixos-vm = {
     defaultUser = "user-vm";
-    users.user-vm.classes = [ "user" "homeManager" ];
+    users.user-vm = { };
   };
 
   den.aspects.nixos-vm = {
     includes = [
       den.batteries.hostname
-      den.aspects.host-base
       den.aspects.system-defaults
       den.aspects.system-tools
       den.aspects.system-services

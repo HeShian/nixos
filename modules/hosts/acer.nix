@@ -2,13 +2,12 @@
 {
   den.hosts.x86_64-linux.acer = {
     defaultUser = "claudia";
-    users.claudia.classes = [ "user" "homeManager" ];
+    users.claudia = { };
   };
 
   den.aspects.acer = {
     includes = [
       den.batteries.hostname
-      den.aspects.host-base
       den.aspects.system-defaults
       den.aspects.system-tools
       den.aspects.system-services
