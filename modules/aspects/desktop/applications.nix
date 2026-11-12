@@ -89,7 +89,6 @@ in
         slurp
         grim
         wl-screenrec
-        gpu-screen-recorder
 
         # ── 系统 / 终端小工具 ───────────────────────────────────
         xprop
