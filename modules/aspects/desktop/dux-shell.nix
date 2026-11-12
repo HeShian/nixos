@@ -22,6 +22,12 @@
         ""
         "${lib.getExe config.programs.dux-files.package} run --session --hidden --keep-running"
       ];
+      # dfiles 在守护进程里按桌面项的 Exec 名启动应用（dms / imv / celluloid / mpv…），
+      # 而 NixOS 默认给 systemd 单元追加最小 PATH（coreutils/findutils/systemd），
+      # 会覆盖用户管理器从会话导入的 PATH，导致双击文件时 exec 找不到程序，
+      # 弹出「无法处理此项目」。与 dms.service / niri 一样关掉默认 PATH，
+      # 让 dfiles 继承会话 PATH（系统 profile、HM profile、flatpak 等）。
+      systemd.user.services.dfiles.enableDefaultPath = false;
 
       # Dux Calendar：后台守护进程（dcal run --session --hidden），
       # 桌面项 / `dcal show` 只负责把窗口唤出来。
