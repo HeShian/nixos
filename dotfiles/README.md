@@ -56,11 +56,11 @@ DMS 和 matugen 会覆盖这些文件：
 - `~/.config/dgop/colors.json`（Dux GOP 的系统监视器配色）
 - `~/.config/dms/*.json`、`~/.local/state/dms/session.json`
 
-首次登录前这些文件可能不存在；`appearance.nix` 会创建空占位，DMS 首次生成配色后自动填充。
+首次登录前这些文件可能不存在；`appearance.nix` 只为 `kitty/dank-theme.conf`、`kitty/dank-tabs.conf`、`fuzzel/colors.ini` 建空占位（避免 include 失败），其余在 DMS 首次生成配色后才有。
 
 ## 脚本
 
-脚本以 `~/.config/niri/scripts/<name>` 调用（niri 会展开 `~`），依赖都在 home-manager 的 `home.packages` 中：
+脚本以 `~/.config/niri/scripts/<name>` 调用（niri 会展开 `~`）。依赖分散在多处：`applications.nix`（jq/fuzzel/fzf/slurp/grim/wl-screenrec/wl-clipboard/satty/libnotify/imagemagick 等）、`system/tools.nix`（curl/git），`dms`/`dfiles`/`pw-play` 来自系统服务与系统包：
 
 - `screenshot-sound.sh`：由 `spawn-at-startup` 启动；截图快捷键先标记截图，剪贴板收到图片后播放快门声。
 - `niri-pick`：`Mod+P`，复制窗口信息。
@@ -70,3 +70,4 @@ DMS 和 matugen 会覆盖这些文件：
 - `wallpaper-random`：`Mod+F10`，DMS 下一张壁纸。
 - `wallpaper-download`：`Mod+Shift+F10`，下载随机壁纸并交给 DMS。
 - `dfiles-tiled`：`Mod+Alt+E`，新开 Dux Files 窗口并切到平铺（dfiles 默认是浮窗）。
+- `annotate-image`：`Mod+Shift+S`，标注图片——剪贴板里有图就标注它，否则先区域截图再标注（satty）。
