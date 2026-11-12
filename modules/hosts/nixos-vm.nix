@@ -8,6 +8,7 @@
   den.aspects.nixos-vm = {
     includes = [
       den.batteries.hostname
+      den.aspects.host-base
       den.aspects.system-defaults
       den.aspects.system-tools
       den.aspects.system-services
@@ -20,7 +21,7 @@
       den.aspects.dotfiles-store
     ];
 
-    nixos = { modulesPath, ... }: {
+    nixos = { modulesPath, lib, ... }: {
       imports = [ (modulesPath + "/profiles/qemu-guest.nix") ];
 
       boot.loader.grub = {
@@ -34,10 +35,8 @@
         fsType = "ext4";
       };
 
-      home-manager.useGlobalPkgs = true;
-      home-manager.useUserPackages = true;
-      home-manager.backupFileExtension = "hm-backup";
-      system.stateVersion = "26.05";
+      # VM 里没有仓库克隆，nh 没有可用的默认 flake（置空而非指向不存在的路径）
+      programs.nh.flake = lib.mkForce null;
     };
   };
 }

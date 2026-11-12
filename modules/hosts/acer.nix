@@ -8,6 +8,7 @@
   den.aspects.acer = {
     includes = [
       den.batteries.hostname
+      den.aspects.host-base
       den.aspects.system-defaults
       den.aspects.system-tools
       den.aspects.system-services
@@ -23,8 +24,6 @@
 
     nixos = { modulesPath, ... }: {
       imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
-
-      programs.nh.flake = "/home/claudia/nixos";
 
       boot.initrd.availableKernelModules = [ "xhci_pci" "nvme" "usbhid" "uas" "sd_mod" ];
       boot.kernelModules = [ "kvm-intel" ];
@@ -66,10 +65,6 @@
         }
       ];
 
-      home-manager.useGlobalPkgs = true;
-      home-manager.useUserPackages = true;
-      home-manager.backupFileExtension = "hm-backup";
-      system.stateVersion = "26.05";
     };
   };
 }
