@@ -1,5 +1,7 @@
 # 引入 flake-parts，并把 feature 的组合单独放进 roles/
 
+参考上游：`github:denful/den` 的 `templates/default`（flake-parts 入口与 `modules/nh.nix`）与 `templates/diagram-demo`（`aspects/roles/` 分层）；本仓库 `flake.lock` pin 在 `bf2504f9f2e8621fee091335132ab3ae698cf808`。
+
 Den 的官方模板（`default`、`diagram-demo`、`fleet-demo`）都基于 flake-parts；只有采用它才能用 `perSystem` 向外暴露 flake 包。改动是：`flake.nix` 换成 `flake-parts.lib.mkFlake`，`modules/dendritic.nix` 改为导入 `inputs.den.flakeModules.default`（`flakeModules.dendritic` 会写 flake-file 的 input 默认值，需要额外引入 flake-file，本仓库不需要），新增 `modules/nh.nix` 用 `den.lib.nh.denPackages` 把每台 host 暴露成 `nix build .#acer` 这样的包。
 
 同时按 `diagram-demo` 的分层补上 `aspects/roles/`：role 是「把多个 feature 组合成一种机器形态」的 aspect——本仓库只有 `desktop`，它只写 `includes`、几乎不写配置，被两台机器共用。与 `features/` 的分工是：feature 描述「一个关注点的配置」，role 描述「这类机器需要哪些 feature」。

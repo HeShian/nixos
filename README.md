@@ -22,6 +22,10 @@ modules/                          # import-tree 递归加载
   _lib/                           # 非 aspect 的辅助函数（import-tree 忽略 _ 前缀）
 ```
 
+> 目录结构参考 Den 的两个官方模板（上游 `github:denful/den`，本仓库 `flake.lock` pin 在 `bf2504f9f2e8621fee091335132ab3ae698cf808`）：
+> - `templates/diagram-demo` —— `modules/aspects/{den,defaults,features,roles,hosts,users}` 的类别分层（见 ADR-0003）；
+> - `templates/default` —— `modules/nh.nix` 的 perSystem 包、flake-parts 入口与 `dendritic.nix` 的接线方式（见 ADR-0004）。
+
 职责划分：
 
 | 类型 | 位置 | 例子 |
