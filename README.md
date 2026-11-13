@@ -26,6 +26,8 @@ modules/                          # import-tree 递归加载
 > - `templates/diagram-demo` —— `modules/aspects/{den,defaults,features,roles,hosts,users}` 的类别分层（见 ADR-0003）；
 > - `templates/default` —— `modules/nh.nix` 的 perSystem 包、flake-parts 入口与 `dendritic.nix` 的接线方式（见 ADR-0004）。
 
+后续改进候选（含触发条件）记录在 [docs/backlog.md](docs/backlog.md)。
+
 职责划分：
 
 | 类型 | 位置 | 例子 |

@@ -11,3 +11,7 @@
 ### Domain docs
 
 探索代码前，查阅单一上下文的根目录术语表和相关架构决策记录。参见 [领域文档](docs/agents/domain.md)。
+
+### Backlog
+
+「评估过但暂不做」与已知债务记录在 [后续改进候选](docs/backlog.md)，每条带触发条件。要跟踪进度时按上面的事项跟踪规则开 issue，backlog 只做候选池。
