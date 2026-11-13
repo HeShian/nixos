@@ -15,6 +15,9 @@ config=${XDG_CONFIG_HOME:-$HOME/.config}
 source=/run/current-system/sw/share/icons/Adwaita/scalable
 icon_key=/org/gnome/desktop/interface/icon-theme
 mkdir -p -- "$icons"
+# 与 Home Manager 的 gtk-legacy-cleanup 共用这个锁（ADR-0007）：两边必须算同一个
+# 路径，否则一个写 settings.ini、一个读旧主题，会互相覆盖。Nix 侧的 xdg.dataHome
+# 由 modules/checks.nix 的锁路径检查对照这里的默认值。
 exec 9>"$icons/.adwaita-matugen.lock"
 flock 9
 

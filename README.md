@@ -32,6 +32,8 @@ modules/                          # import-tree 递归加载
     users/                        # claudia、user-vm（user aspect：身份与 git）
   _lib/                           # 非 aspect 的辅助代码（import-tree 忽略 _ 前缀）
     appearance.nix                # 外观值唯一来源（光标、图标 fallback），见 ADR-0006
+    appearance-scripts.nix        # 打包三个 activation 脚本（writeShellApplication）
+    scripts/                      # seed-appearance / dms-defaults / gtk-legacy-cleanup，见 ADR-0007
     dotfiles.nix                  # dotfiles 链接实现
 ```
 
@@ -98,8 +100,11 @@ nixos-rebuild build --flake .#nixos-vm
 - 图标：登录界面（Dux Greeter）固定用系统 profile 里的 `Papirus-Dark`；登录后的图标主题由 matugen 的
   `folder-icons.sh` 生成 `Adwaita-Matugen-*`，写入 dconf 与 `~/.config/gtk-{3,4}.0/settings.ini`，
   DMS 设置里保持 `System Default` 跟随系统。
-- `desktop-appearance.nix` 中的首启种子在首次激活时写入 DMS 默认设置，之后只补齐缺失的键。已有值可在 DMS 中修改。
-- Home Manager 激活时会备份已知的 Noctalia / KDE 上代遗留到 XDG 缓存目录下的 `nixos-migration-backup/`。它移除旧样式导入、修复 Breeze 图标和光标，并保留其他用户设置。GTK 迁移与 matugen 使用同一个锁来更新图标主题。
+- 首启种子、DMS 缺键补齐与上代遗留迁移的实现在 `modules/_lib/scripts/`，路径由 Nix 求值后显式传入
+  （ADR-0007）；`nix flake check` 会在临时目录里跑这三个脚本，断言幂等、干跑不写盘与已有设置保留。
+- `seed-appearance` 在首次激活时写入 DMS 默认设置与桌面占位文件，`dms-defaults` 之后只补齐缺失的键。
+  已有值可在 DMS 中修改。
+- Home Manager 激活时会备份已知的 Noctalia / KDE 上代遗留到 XDG 缓存目录下的 `nixos-migration-backup/`。它移除旧样式导入、修复 Breeze 图标和光标，并保留其他用户设置。GTK 迁移与 matugen 用同一个 `~/.local/share/icons/.adwaita-matugen.lock` 串行化。
 - fcitx5 主题：DMS 的 matugen 会生成 `~/.local/share/fcitx5/themes/dms`，系统配置写 `Theme=dms`；
   DMS 生成主题后通过 D-Bus 重载 classicui（手动重启：`pkill fcitx5; fcitx5 -d` 或 `Mod+F1`）。
 - GTK 3/4 的用户样式导入 Dux 生成的 `dank-colors.css`。CAVA 使用 Matugen 生成的主题。
