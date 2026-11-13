@@ -54,7 +54,8 @@ modules/                          # import-tree 递归加载
 
 ## 应用配置
 
-首次切换前建议先 `git add -A`（flake 在 git 仓库中只打包已跟踪文件；VM 的 dotfiles 软链依赖这一点）：
+首次切换前建议先 `git add -A`（flake 在 git 仓库中只打包已跟踪文件；VM 的 dotfiles 软链依赖这一点）。
+从旧的**目录级**链接布局升级时，先 `rm -f ~/.config/matugen ~/.config/niri/scripts` —— 否则 Home Manager 会顺着旧软链把文件写进仓库（见 ADR-0009 的迁移注意）：
 
 ```bash
 cd ~/nixos

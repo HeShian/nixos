@@ -20,3 +20,15 @@ Status: accepted
 
 - 新增或删除 Dotfile 自动生效；`_lib/dotfiles.nix` 从 45 行降到 60 行，但其中 20 行是注释与递归本身，不再有需要同步的清单。
 - 两种模式（`dotfiles-live` / `dotfiles-store`）枚举同一棵树，条目集合一致（实测两台 Host 都是同一组 35 个文件）。
+
+## 迁移注意（从旧的目录级链接升级）
+
+旧的 `niri/scripts`、`matugen` 两条目录级链接会留在 `~/.config` 里；Home Manager 只用 `rmdir` 尝试删除它们（激活日志：`rmdir: failed to remove '.config/niri/scripts': 不是目录`），于是它顺着这条软链把文件级链接写进了**仓库工作树**。acer 上实测：18 个文件被替换成 store 软链、生成 18 个 `.hm-backup`。
+
+升级前先删掉这两条旧链接：
+
+```bash
+rm -f ~/.config/matugen ~/.config/niri/scripts
+```
+
+`dotfiles-store` 的 Host 更要先删：store 树只读，HM 写进去会让激活直接失败。已经踩上时的恢复办法：删软链 → `git checkout -- <受影响的目录>` → `git clean -f -- <受影响的目录>` → 让 HM 重新建立链接。
