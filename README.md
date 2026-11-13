@@ -78,7 +78,8 @@ nixos-rebuild build --flake .#nixos-vm
 ## 常用修改
 
 - **快捷键 / 窗口规则 / 布局 / 动画 / 模糊**：改 `dotfiles/.config/niri/*.kdl`，保存后 niri 自动重载。
-- **显示器**：改 `dotfiles/.config/niri/outputs.kdl`（不要用 DMS 的显示设置页，那里写的文件没有 include）。
+- **显示器**：`dotfiles/.config/niri/outputs.kdl` 是默认值；DMS 的显示设置页写 `dms/outputs.kdl`，在手写之后 include，会覆盖它。
+- **输入 / 布局**：改 `dotfiles/.config/niri/config.kdl` 的 `input` 段与 `layout.kdl`。DMS 的这两页**不生效**：`dms/input.kdl`、`dms/layout.kdl` 是它在启动时按自身默认值写的，会有意不 include（理由见 `config.kdl` 头部）。
 - **默认程序 / shell 配置**：`dotfiles/.config/kitty/kitty.conf`、`dotfiles/.config/fish/config.fish`。
 - **配色**：DMS 按壁纸生成；额外应用模板在 `dotfiles/.config/matugen/`，换壁纸后自动执行。
 - **应用与默认关联**：普通应用的安装、默认关联和接线在 `desktop-applications.nix` 内按应用关注点一起维护；Dux 日历与便签关联在 `dux.nix` 的 `dux` 里，文件管理与压缩包关联在同一个文件的 `dux-files` 里。系统、开发与终端工具在 `tools.nix`。这些文件都在 `modules/aspects/features/`。
@@ -94,7 +95,8 @@ nixos-rebuild build --flake .#nixos-vm
   四个渲染面 —— niri 会话变量 `XCURSOR_*`（systemd 用户服务等非 niri 子进程）、dconf（GTK）、DMS
   `settings.json` 首启种子（DMS 界面初始值）、Dux Greeter 的 compositor 配置（登录界面）—— 并生成
   `~/.config/niri/appearance.kdl` 给 niri 的 `cursor {}` 用（`include optional=true`：未激活或回滚到旧代际时
-  退回 `XCURSOR_*`）。改光标只改那个文件（ADR-0006）。
+  退回 `XCURSOR_*`）。它 include 在 `dms/cursor.kdl` 之前，所以在 DMS 光标设置页改过的值会覆盖初值。
+  改默认光标只改那个文件（ADR-0006）。
 - 两个作用域有意不取这个值：Dux Greeter 的 `hide-after-inactive-ms 0`（登录界面不隐藏光标）；
   matugen `folder-icons.sh` 的 `Inherits=Papirus-Dark`（缺图时的继承链，由 Dotfile 自己的 `config.toml` 调用）。
 - 图标：登录界面（Dux Greeter）固定用系统 profile 里的 `Papirus-Dark`；登录后的图标主题由 matugen 的
@@ -123,7 +125,7 @@ nixos-rebuild build --flake .#nixos-vm
 
 - `~/.config/dms/settings.json`、`clsettings.json`
 - `~/.local/state/dms/session.json`
-- `~/.config/niri/dms/` 下的 `binds.kdl`、`outputs.kdl`、`colors.kdl`、`alttab.kdl`、`cursor.kdl`、`windowrules.kdl`、`wpblur.kdl`（由 `config.kdl` 可选 include）
+- `~/.config/niri/dms/` 下的 `binds.kdl`、`outputs.kdl`、`colors.kdl`、`alttab.kdl`、`cursor.kdl`、`windowrules.kdl`、`wpblur.kdl`（由 `config.kdl` 可选 include，位于手写分片之后）；另有 `input.kdl`、`layout.kdl` 也被写入，但**有意不 include** —— 它们由 DMS 启动时按自身默认值生成，会覆盖手写的显式选择。
 - `~/.vscode/extensions/` 的 DankShell 扩展与 `~/.config/Code/User/settings.json`（由 `desktop-applications.nix` 激活时写入）
 - `~/.config/kitty/dank-theme.conf`、`dank-tabs.conf`
 - `~/.config/fuzzel/colors.ini`、`~/.config/starship.toml`、`~/.config/yazi/theme.toml`、`~/.config/fastfetch/config.jsonc`、`~/.config/dgop/colors.json`

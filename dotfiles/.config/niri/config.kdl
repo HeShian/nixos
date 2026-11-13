@@ -4,7 +4,8 @@
 // │ 直接编辑保存即可，niri 会自动重载；DMS 生成的片段在 ~/.config/niri/dms/。  │
 // └──────────────────────────────────────────────────────────────────────────┘
 
-// 手写配置分片
+// 手写配置分片。生效顺序 = 文件顺序：同一设置后写的覆盖先写的。
+// 手写块是默认值，DMS 运行期片段（下面的 dms/*）在其后，用户在 DMS 界面改的东西优先。
 include "layout.kdl"
 include "animations.kdl"
 include "blur.kdl"
@@ -13,15 +14,25 @@ include "supertab.kdl"
 include "binds.kdl"
 include "outputs.kdl"
 
-// Dux Shell / matugen 运行时生成的片段（首次生成前不存在，用 optional 跳过）
-include optional=true "dms/binds.kdl"
-include optional=true "dms/outputs.kdl"
-include optional=true "dms/colors.kdl"
-include optional=true "dms/alttab.kdl"
-include optional=true "dms/cursor.kdl"
-include optional=true "dms/windowrules.kdl"
+// 外观初值（光标），由 Home Manager 生成（ADR-0006）。放在 dms/cursor.kdl 之前，
+// 让 DMS 光标设置页的改动能覆盖它。
+include optional=true "appearance.kdl"
+
+// DMS / matugen 运行时生成的片段（首次生成前不存在，用 optional 跳过）。
+// 位置固定在手写块之后，理由逐条列在下面。
+include optional=true "dms/binds.kdl"      // DMS 绑定补空位
+include optional=true "dms/outputs.kdl"    // 显示设置页优先于手写 outputs.kdl
+include optional=true "dms/colors.kdl"     // 只补颜色，手写块不设色值
+include optional=true "dms/alttab.kdl"     // 只加 layer-rule / 键位
+include optional=true "dms/cursor.kdl"     // 光标设置页优先于 appearance.kdl 的初值
+include optional=true "dms/windowrules.kdl" // DMS 新建的窗口规则优先（见 windowrules.kdl 头部）
 // overview 背景：把 DMS 的模糊壁纸层放进 niri 的 backdrop
 include optional=true "dms/wpblur.kdl"
+
+// 有意不 include 的两个片段：
+//   dms/input.kdl    —— DMS 启动时按自身默认值写出（accel 0.0），会覆盖手写的 -0.15
+//   dms/layout.kdl   —— 同上（gaps 4 / border 2 / 窗口圆角），会覆盖手写的 gaps 12 / border off
+// 也就是说 DMS 的「输入」「布局」两页不会生效；改这两类设置请改本文件的 input 段与 layout.kdl。
 
 // 截图保存位置（niri 自带截图 UI / Screenshot 键）
 screenshot-path "~/Pictures/Screenshots/Niri-screenshots/%Y-%m-%d_%H-%M-%S.png"
@@ -74,11 +85,8 @@ input {
     }
 }
 
-// 光标：值在 modules/_lib/appearance.nix，由 Home Manager 生成本分片（ADR-0006）。
-// optional=true：Dotfile 是活链接，改完即生效，而生成文件要等 activation 才出现；
-// 回滚到旧代际时也不会生成它。缺分片时光标退回会话变量 XCURSOR_THEME/SIZE（同一个值）。
-// 原位 include，保持与 DMS 运行期片段的相对顺序不变；优先级另有 issue 跟踪。
-include optional=true "appearance.kdl"
+// 光标：值的来源在 modules/_lib/appearance.nix，分片由 Home Manager 生成（ADR-0006），
+// include 在文件头部（见那里的注释），DMS 光标设置页优先。
 
 // 启动时隐藏 Niri 自带的“Important Hotkeys”教程
 hotkey-overlay {

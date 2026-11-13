@@ -15,7 +15,7 @@ Status: accepted
 ## 边界
 
 - matugen 的 `folder-icons.sh` 里 `Inherits=Papirus-Dark` 仍是 Dotfile 字面量：它由 Dotfile 自己的 `config.toml` 的 `post_hook` 调用，Nix 注入不到那条命令；它也是缺图时的继承链，不是活动主题。
-- DMS 运行期写的 `~/.config/niri/dms/cursor.kdl` 与手写片段的优先级不在本决定内，见 issue #3。
+- DMS 运行期写的 `~/.config/niri/dms/cursor.kdl` 与手写片段的优先级见文末修订与 issue #3。
 - 登录界面的 `output "eDP-1" { scale 1.25 }` 与 `outputs.kdl` 的缩放仍是两份：那是「输出事实」，不是外观值，已记入 `docs/backlog.md`。
 
 ## 后果
@@ -23,3 +23,11 @@ Status: accepted
 - 改光标或图标 fallback 只需改 `modules/_lib/appearance.nix`；四个渲染面与 niri 分片随之改变，任一渲染面被改回字面量时 `nix flake check` 失败。
 - Dotfile 层少了「光标」这一个可手改点。它本来就是固定值，符合 README 的归属表（固定不变 → NixOS / home-manager 模块）。
 - 新增 Host 只要 include `desktop` Role 就自动拿到 `appearance` 参数；未启用 Greeter 的 Host 会被 checks 过滤掉，不会误报。
+
+## 2026-11-13 修订：分片移到 DMS 片段之前
+
+原决定把 `appearance.kdl` include 在 Dotfile 里 `cursor {}` 的原位置，也就是 `dms/*.kdl` 之后 —— 那等于让初值反过来覆盖 DMS 光标设置页的改动。issue #3 查清了这类片段的摆放规则（按位置插入，同名设置后者覆盖前者）之后，改为把**手写块与 `appearance.kdl` 一起放在 `dms/*.kdl` 之前**：
+
+- 手写块 = 默认值；DMS 运行期片段 = 用户在界面里改动的权威。`dms/cursor.kdl` 因此能覆盖 `appearance.kdl` 的初值，与本文「interface 是初值」的定位一致。
+- 同时确认 `dms/input.kdl` 与 `dms/layout.kdl` **有意不 include**：它们是 DMS 启动时按自身默认值写出的（鼠标 accel 0.0、gaps 4、border 宽度 2、窗口圆角），include 会把手写的显式选择换成 DMS 的默认值。DMS 的「输入」「布局」两页因此不生效，改这两类设置要改 Dotfile。
+- 片段 → 位置 → 理由的完整表格在 `dotfiles/.config/niri/config.kdl` 头部。
