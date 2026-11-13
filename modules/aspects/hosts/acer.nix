@@ -3,14 +3,11 @@
   den.aspects.acer = {
     includes = [
       den.batteries.hostname
-      den.aspects.system-defaults
-      den.aspects.system-tools
-      den.aspects.system-services
-      den.aspects.development-tools
+      den.aspects.system
+      den.aspects.tools
       den.aspects.gpu
-      den.aspects.networkmanager
+      den.aspects.networking
       den.aspects.proxy
-      den.aspects.openssh
       den.aspects.desktop
       # 仓库内的 dotfiles 以“活链接”方式挂到 ~/.config，改完即生效
       den.aspects.dotfiles-live
@@ -21,6 +18,11 @@
 
       boot.initrd.availableKernelModules = [ "xhci_pci" "nvme" "usbhid" "uas" "sd_mod" ];
       boot.kernelModules = [ "kvm-intel" ];
+
+      hardware.bluetooth = {
+        enable = true;
+        powerOnBoot = true;
+      };
 
       boot.loader.systemd-boot.enable = true;
       boot.loader.efi.canTouchEfiVariables = true;

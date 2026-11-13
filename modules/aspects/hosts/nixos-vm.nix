@@ -3,13 +3,10 @@
   den.aspects.nixos-vm = {
     includes = [
       den.batteries.hostname
-      den.aspects.system-defaults
-      den.aspects.system-tools
-      den.aspects.system-services
-      den.aspects.development-tools
+      den.aspects.system
+      den.aspects.tools
       den.aspects.qemu-guest
-      den.aspects.networkmanager
-      den.aspects.openssh
+      den.aspects.networking
       den.aspects.desktop
       # VM 内没有仓库克隆，直接链接 flake 源里的 dotfiles（构建时只读）
       den.aspects.dotfiles-store
@@ -17,6 +14,11 @@
 
     nixos = { modulesPath, lib, ... }: {
       imports = [ (modulesPath + "/profiles/qemu-guest.nix") ];
+
+      hardware.bluetooth = {
+        enable = true;
+        powerOnBoot = true;
+      };
 
       boot.loader.grub = {
         enable = true;

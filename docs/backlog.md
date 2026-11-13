@@ -15,13 +15,11 @@
 
 - [ ] **dotfiles 链接粒度不一致** —— 19 条里 17 条是文件级，`niri/scripts` 与 `matugen` 是目录级。统一成目录级可让新增文件自动生效，但也会让"忘了加链接"不再报错。触发：`dotfiles/` 下某类文件经常新增时。
 - [ ] **kitty 的 xray 规则重复** —— `dotfiles/.config/niri/blur.kdl` 已有全局规则，`windowrules.kdl` 又给 kitty 写了一份。触发：模糊效果表现异常时顺手合并。
-- [ ] **`gtk-{3,4}.0/settings.ini` 双写** —— `desktop-appearance-settings` 的激活脚本与 `matugen/folder-icons.sh` 都写它；当前靠"仅在检测到 breeze/失效主题时才修"兼容，属**值重复 + 条件修复**，不是冲突（见关键记忆）。触发：图标主题表现反直觉时再动。
-- [ ] **proxy 的作用域不对称** —— `proxy` aspect 只被 `acer` include，但 `clash-verge` 的 tun/serviceMode 经 `desktop` 也进了 VM。触发：VM 里出现需要/不需要代理的明确需求。
+- [ ] **proxy 的作用域不对称** —— `proxy` aspect 只被 `acer` include，但 `networking` 的 Clash tun/serviceMode 也进了 VM。触发：VM 里出现需要/不需要代理的明确需求。
 - [ ] **`openssh` 在 acer 与 VM 都开 `PasswordAuthentication = true`** —— 触发：对外的机器要收紧时。
 - [ ] **`niri-pick` 的 rofi / hyprpicker fallback 分支** —— 工具未安装，但属于有意的降级链，**不删**；仅记录以免下次被当死代码清掉。
 - [ ] **`programs.nh.flake` 在 VM 为 `null`** —— VM 里没有仓库克隆，`nh os switch` 无法工作。触发：需要在 VM 内自建时（克隆仓库或改 remote build）。
 - [ ] **`AGENTS.md` 缺常用命令** —— 构建/切换命令只写在 README，agent 入口没有。触发：下一个 agent 又问"怎么构建"时补一行。
-- [ ] **`defaults.nix` 与 `system-defaults.nix` 名字相近** —— 前者是 `den.default`（全局），后者是 `system-defaults` aspect。触发：混淆真的发生时再重命名。
 
 ## 运维
 
