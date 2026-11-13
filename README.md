@@ -91,7 +91,8 @@ nixos-rebuild build --flake .#nixos-vm
 - 光标：`Bibata-Modern-Ice`，24px，装在系统 profile。值只有一处来源：`modules/_lib/appearance.nix`。它分发给
   四个渲染面 —— niri 会话变量 `XCURSOR_*`（systemd 用户服务等非 niri 子进程）、dconf（GTK）、DMS
   `settings.json` 首启种子（DMS 界面初始值）、Dux Greeter 的 compositor 配置（登录界面）—— 并生成
-  `~/.config/niri/appearance.kdl` 给 niri 的 `cursor {}` 用。改光标只改那个文件（ADR-0006）。
+  `~/.config/niri/appearance.kdl` 给 niri 的 `cursor {}` 用（`include optional=true`：未激活或回滚到旧代际时
+  退回 `XCURSOR_*`）。改光标只改那个文件（ADR-0006）。
 - 两个作用域有意不取这个值：Dux Greeter 的 `hide-after-inactive-ms 0`（登录界面不隐藏光标）；
   matugen `folder-icons.sh` 的 `Inherits=Papirus-Dark`（缺图时的继承链，由 Dotfile 自己的 `config.toml` 调用）。
 - 图标：登录界面（Dux Greeter）固定用系统 profile 里的 `Papirus-Dark`；登录后的图标主题由 matugen 的

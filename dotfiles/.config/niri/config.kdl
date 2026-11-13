@@ -75,8 +75,10 @@ input {
 }
 
 // 光标：值在 modules/_lib/appearance.nix，由 Home Manager 生成本分片（ADR-0006）。
+// optional=true：Dotfile 是活链接，改完即生效，而生成文件要等 activation 才出现；
+// 回滚到旧代际时也不会生成它。缺分片时光标退回会话变量 XCURSOR_THEME/SIZE（同一个值）。
 // 原位 include，保持与 DMS 运行期片段的相对顺序不变；优先级另有 issue 跟踪。
-include "appearance.kdl"
+include optional=true "appearance.kdl"
 
 // 启动时隐藏 Niri 自带的“Important Hotkeys”教程
 hotkey-overlay {

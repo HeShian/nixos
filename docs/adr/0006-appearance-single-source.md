@@ -8,7 +8,7 @@ Status: accepted
 
 1. 值集中在 `modules/_lib/appearance.nix`，interface 只有值：`cursor.{theme,size,hideAfterInactiveMs}` 与 `icons.fallback`。它不是 Aspect —— 没有自己的配置，只被分发。
 2. 用 `den.default.nixos._module.args.appearance` 与 `den.default.homeManager._module.args.appearance` 挂成两套 module system 的模块参数。不用 `options`：options 会让消费方隐式依赖「承载 aspect 被 include」，而 aspect 组合正是 Host / Role 的接口，漏 include 时表现为 `option undefined`。两套 module system 的参数不共享，必须各挂一次。
-3. niri 的 `cursor {}` 不再写在 Dotfile 里：Home Manager 生成 `~/.config/niri/appearance.kdl`，`config.kdl` 在原位置 include 它，与 DMS 运行期片段的相对顺序保持不变。`hide-after-inactive-ms` 进值表，因为整块被替换后不能指望「两个 cursor 块按 key 合并」—— 那是 issue #3 里待确认的语义。
+3. niri 的 `cursor {}` 不再写在 Dotfile 里：Home Manager 生成 `~/.config/niri/appearance.kdl`，`config.kdl` 在原位置 `include optional=true` 它，与 DMS 运行期片段的相对顺序保持不变。用 optional 而不是强制 include：Dotfile 是活链接、改完即生效，生成文件却要等 activation，`nh os rollback` 时旧代际也不会生成它 —— 强制 include 会让合成器配置在那些窗口里不可解析。缺分片时光标退回会话变量 `XCURSOR_THEME/SIZE`（同一个值），而分片内容由 `nix flake check` 断言，静默失败被覆盖。`hide-after-inactive-ms` 进值表，因为整块被替换后不能指望「两个 cursor 块按 key 合并」—— 那是 issue #3 里待确认的语义。
 4. 作用域特有的行为留在作用域：Dux Greeter 的 `hide-after-inactive-ms 0` 是登录界面行为，不取 `appearance` 的值。
 5. `modules/checks.nix` 增加 eval 级检查：`nix flake check` 断言四个渲染面与生成分片都等于值模块里的值。检查不写死具体值，所以改光标只需改一个文件。
 
