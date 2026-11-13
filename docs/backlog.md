@@ -13,7 +13,6 @@
 
 ## 清理与一致性（来自这次审计，未做）
 
-- [ ] **dotfiles 链接粒度不一致** —— 19 条里 17 条是文件级，`niri/scripts` 与 `matugen` 是目录级。统一成目录级可让新增文件自动生效，但也会让"忘了加链接"不再报错。触发：`dotfiles/` 下某类文件经常新增时。
 - [ ] **kitty 的 xray 规则重复** —— `dotfiles/.config/niri/blur.kdl` 已有全局规则，`windowrules.kdl` 又给 kitty 写了一份。触发：模糊效果表现异常时顺手合并。
 - [ ] **proxy 的作用域不对称** —— `proxy` aspect 只被 `acer` include，但 `networking` 的 Clash tun/serviceMode 也进了 VM。触发：VM 里出现需要/不需要代理的明确需求。
 - [ ] **`openssh` 在 acer 与 VM 都开 `PasswordAuthentication = true`** —— 触发：对外的机器要收紧时。

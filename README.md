@@ -35,7 +35,7 @@ modules/                          # import-tree 递归加载
     session-env.nix               # 会话环境表唯一来源（输入法 / 默认程序 / 光标），见 ADR-0008
     appearance-scripts.nix        # 打包三个 activation 脚本（writeShellApplication）
     scripts/                      # seed-appearance / dms-defaults / gtk-legacy-cleanup，见 ADR-0007
-    dotfiles.nix                  # dotfiles 链接实现
+    dotfiles.nix                  # dotfiles 链接实现：条目由树递归生成，见 ADR-0009
 ```
 
 > 目录结构参考 Den 的两个官方模板（上游 `github:denful/den`，本仓库 `flake.lock` pin 在 `bf2504f9f2e8621fee091335132ab3ae698cf808`）：
