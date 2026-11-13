@@ -55,7 +55,8 @@
       })
 
   # Greeter 登录界面
-  ({ services.displayManager.dux-greeter = {
+  ({ appearance, ... }:
+    { services.displayManager.dux-greeter = {
         enable = true;
         compositor.name = "niri";
         configHome = "/home/${host.defaultUser}";
@@ -74,8 +75,9 @@
           }
 
           cursor {
-              xcursor-theme "Bibata-Modern-Ice"
-              xcursor-size 24
+              xcursor-theme "${appearance.cursor.theme}"
+              xcursor-size ${toString appearance.cursor.size}
+              // 登录界面不隐藏光标：这是作用域特有的行为，不取 appearance 里的值。
               hide-after-inactive-ms 0
           }
 
@@ -85,10 +87,11 @@
           }
 
           environment {
-              QS_ICON_THEME "Papirus-Dark"
+              QS_ICON_THEME "${appearance.icons.fallback}"
           }
         '';
-      }; })
+      };
+    })
 
   # Shell / Greeter 共用主题，登录前从系统 profile 可见
   ({ pkgs, ... }: {

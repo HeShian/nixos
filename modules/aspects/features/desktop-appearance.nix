@@ -38,8 +38,8 @@
         };
       })
 
-  # 声明设置与 Qt / GTK 主题依赖
-  ({ pkgs, ... }:
+  # 声明设置与 Qt / GTK 主题依赖，并生成 niri 的外观分片
+  ({ appearance, pkgs, ... }:
       {
         home.packages = [
           pkgs.qt6Packages.qt6ct # DMS 检测到 qt6ct 后启用 Qt 配色。
@@ -50,13 +50,24 @@
         dconf.settings."org/gnome/desktop/interface" = {
           color-scheme = "prefer-dark";
           gtk-theme = "adw-gtk3-dark";
-          cursor-theme = "Bibata-Modern-Ice";
-          cursor-size = 24;
+          cursor-theme = appearance.cursor.theme;
+          cursor-size = appearance.cursor.size;
         };
+
+        # Dotfile 的 cursor{} 块已由这里取代（ADR-0006）：config.kdl 原位 include 这个
+        # 分片，与 DMS 运行期片段的相对顺序保持不变。
+        xdg.configFile."niri/appearance.kdl".text = ''
+          // 由 modules/aspects/features/desktop-appearance.nix 生成；值在 modules/_lib/appearance.nix。
+          cursor {
+              xcursor-theme "${appearance.cursor.theme}"
+              xcursor-size ${toString appearance.cursor.size}
+              hide-after-inactive-ms ${toString appearance.cursor.hideAfterInactiveMs}
+          }
+        '';
       })
 
   # 首启种子：保留已有运行时设置
-  ({ config, lib, pkgs, ... }:
+  ({ appearance, config, lib, pkgs, ... }:
       let
         defaultWallpaper = pkgs.nixos-artwork.wallpapers.catppuccin-mocha.gnomeFilePath;
         cavaFallback = pkgs.writeText "cava-theme-fallback" ''
@@ -124,7 +135,7 @@
               iconThemeDark = "System Default";
               iconThemeLight = "System Default";
               iconThemePerMode = false;
-              cursorSettings = { theme = "Bibata-Modern-Ice"; size = 24; };
+              cursorSettings = { theme = appearance.cursor.theme; size = appearance.cursor.size; };
               blurredWallpaperLayer = true;
               blurWallpaperOnOverview = true;
             })}
@@ -159,7 +170,7 @@
       })
 
   # 上代遗留迁移：备份与用户设置保护
-  ({ config, lib, pkgs, ... }:
+  ({ appearance, config, lib, pkgs, ... }:
       {
         home.activation.gtk-legacy-cleanup = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
           if [[ ! -v DRY_RUN ]]; then (
@@ -237,11 +248,11 @@
                 if [[ ! -e "$settings" ]]; then printf '[Settings]\n' > "$settings"; fi
                 case "$icon_theme" in
                   ""|breeze|breeze-dark|Breeze|Breeze-Dark|default|Default)
-                    set_ini_key "$settings" gtk-icon-theme-name Papirus-Dark ;;
+                    set_ini_key "$settings" gtk-icon-theme-name ${lib.escapeShellArg appearance.icons.fallback} ;;
                 esac
                 case "$cursor_theme" in
                   ""|breeze_cursors|default|Default)
-                    set_ini_key "$settings" gtk-cursor-theme-name Bibata-Modern-Ice ;;
+                    set_ini_key "$settings" gtk-cursor-theme-name ${lib.escapeShellArg appearance.cursor.theme} ;;
                 esac
               fi
             done

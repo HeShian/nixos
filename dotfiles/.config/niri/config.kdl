@@ -74,13 +74,9 @@ input {
     }
 }
 
-// 光标；DMS 的光标设置会写 dms/cursor.kdl，在文件末尾 include，优先级更高
-// 这里显式指定已安装的 Bibata 主题，避免 XCURSOR_THEME=default 导致找不到光标
-cursor {
-    xcursor-theme "Bibata-Modern-Ice"
-    xcursor-size 24
-    hide-after-inactive-ms 15000
-}
+// 光标：值在 modules/_lib/appearance.nix，由 Home Manager 生成本分片（ADR-0006）。
+// 原位 include，保持与 DMS 运行期片段的相对顺序不变；优先级另有 issue 跟踪。
+include "appearance.kdl"
 
 // 启动时隐藏 Niri 自带的“Important Hotkeys”教程
 hotkey-overlay {
