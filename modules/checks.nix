@@ -261,6 +261,37 @@
           ''
         else
           throw "外观锁路径不一致：\n${lib.concatMapStringsSep "\n" (i: "  - ${i}") lockPathIssues}";
+
+      # 会话环境：唯一来源是 modules/_lib/session-env.nix，Dotfile 不得再写 environment 块。
+      sessionEnv = import ./_lib/session-env.nix { appearance = import ./_lib/appearance.nix; };
+
+      sessionEnvIssues =
+        builtins.concatMap (
+          host:
+          let
+            cfg = self.nixosConfigurations.${host}.config;
+            actual = cfg.environment.sessionVariables;
+            wrong = builtins.filter (k: (actual.${k} or null) != sessionEnv.${k}) (
+              builtins.attrNames sessionEnv
+            );
+          in
+          map (
+            k: "${host}: ${k} 期望 ${sessionEnv.${k}}，实际 ${toString (actual.${k} or "缺失")}"
+          ) wrong
+        ) desktopHosts
+        ++ lib.optional
+          (lib.hasInfix "\nenvironment {" (
+            builtins.readFile ../dotfiles/.config/niri/config.kdl
+          ))
+          "config.kdl 里又出现了 environment {} 块：会话变量应改 modules/_lib/session-env.nix";
+
+      sessionEnvCheck =
+        if sessionEnvIssues == [ ] then
+          pkgs.runCommand "session-env-single-source" { } ''
+            echo "会话环境与 modules/_lib/session-env.nix 一致，Dotfile 未重复承载" > $out
+          ''
+        else
+          throw "会话环境不一致：\n${lib.concatMapStringsSep "\n" (i: "  - ${i}") sessionEnvIssues}";
     in
     {
       checks =
@@ -270,6 +301,7 @@
           appearance-scripts-dms-defaults = dmsScriptCheck;
           appearance-scripts-gtk-legacy = gtkScriptCheck;
           appearance-lock-path = lockPathCheck;
+          session-env-single-source = sessionEnvCheck;
         };
     };
 }

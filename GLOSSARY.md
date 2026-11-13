@@ -52,6 +52,10 @@ _Avoid_: Nix 模式
 由 Nix 产生、被多个作用域各取一份的外观常量（光标主题与尺寸、图标 fallback），集中在 `modules/_lib/appearance.nix`，通过模块参数 `appearance` 分发。不是 Aspect：它没有自己的配置。
 _Avoid_: 主题、样式值（会与 DMS 运行时生成的主题混淆）
 
+**会话环境**：
+登录会话导出的环境变量（输入法、默认程序、Wayland 提示、光标），唯一来源是 `modules/_lib/session-env.nix`，由 niri Aspect 写到 `environment.sessionVariables`。Dotfile 的 niri `environment {}` 块不再承载这些值。
+_Avoid_: 环境变量（泛指，会与 `environment.variables` 这类系统级设置混淆）
+
 ### 状态与遗留
 
 **运行时生成文件**：

@@ -1,19 +1,14 @@
 {
   den.aspects.desktop-localization = {
     nixos.imports = [
-  # 语言环境与输入法接线
+  # 语言环境
   ({
         i18n = {
           defaultLocale = "zh_CN.UTF-8";
           supportedLocales = [ "zh_CN.UTF-8/UTF-8" "en_US.UTF-8/UTF-8" ];
         };
-
-        # 参考 niri 的 environment：让 Qt / SDL 程序也接入 fcitx5
-        environment.variables = {
-          QT_IM_MODULE = "fcitx";
-          QT_IM_MODULES = "wayland;fcitx";
-          SDL_IM_MODULE = "fcitx";
-        };
+        # 输入法相关的环境变量统一由会话环境表提供（modules/_lib/session-env.nix），
+        # 这里只留下 locale 与下面的 fcitx5 配置。
       })
 
   # Fcitx5 / Rime

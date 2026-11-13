@@ -42,28 +42,12 @@ xwayland-satellite {
     path "/run/current-system/sw/bin/xwayland-satellite"
 }
 
-environment {
-    LANG "zh_CN.UTF-8"
-    LANGUAGE "zh_CN:en"
-
-    // 输入法
-    XMODIFIERS "@im=fcitx"
-    QT_IM_MODULE "fcitx"
-    QT_IM_MODULES "wayland;fcitx"
-    SDL_IM_MODULE "fcitx"
-    GTK_IM_MODULE "fcitx"
-
-    // 图标主题不在这里写 QS_ICON_THEME：
-    // Dux Shell 2.x 的 IconThemeService 在 QS_ICON_THEME 存在时会跳过系统主题探测，
-    // 图标主题改由 GSettings（dconf）提供。
-
-    // 默认程序
-    EDITOR "nvim"
-    TERMINAL "kitty"
-
-    // Intel + NVIDIA 双显卡时，GTK4 应用启动慢可取消注释（xray 模糊在部分驱动上也可能受影响）
-    //GSK_RENDERER "gl"
-}
+// 会话环境变量不在这里写：唯一来源是 modules/_lib/session-env.nix，由 niri Aspect
+// 写到 environment.sessionVariables（登录会话导出，niri 与 systemd 用户服务都能拿到）。
+// 需要新增会话变量时改那张表，不要在这里加 environment {} 块。
+//
+// 图标主题也不在这里写 QS_ICON_THEME：Dux Shell 2.x 的 IconThemeService 在它存在时
+// 会跳过系统主题探测，图标主题改由 GSettings（dconf）提供。
 
 input {
     keyboard {

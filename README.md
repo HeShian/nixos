@@ -32,6 +32,7 @@ modules/                          # import-tree 递归加载
     users/                        # claudia、user-vm（user aspect：身份与 git）
   _lib/                           # 非 aspect 的辅助代码（import-tree 忽略 _ 前缀）
     appearance.nix                # 外观值唯一来源（光标、图标 fallback），见 ADR-0006
+    session-env.nix               # 会话环境表唯一来源（输入法 / 默认程序 / 光标），见 ADR-0008
     appearance-scripts.nix        # 打包三个 activation 脚本（writeShellApplication）
     scripts/                      # seed-appearance / dms-defaults / gtk-legacy-cleanup，见 ADR-0007
     dotfiles.nix                  # dotfiles 链接实现
@@ -97,6 +98,9 @@ nixos-rebuild build --flake .#nixos-vm
   `~/.config/niri/appearance.kdl` 给 niri 的 `cursor {}` 用（`include optional=true`：未激活或回滚到旧代际时
   退回 `XCURSOR_*`）。它 include 在 `dms/cursor.kdl` 之前，所以在 DMS 光标设置页改过的值会覆盖初值。
   改默认光标只改那个文件（ADR-0006）。
+- 会话环境（输入法、`EDITOR`/`TERMINAL`、Wayland 提示、`XCURSOR_*`）只有一处来源：`modules/_lib/session-env.nix`，
+  由 niri Aspect 写到 `environment.sessionVariables`。Dotfile 的 niri `environment {}` 块已删除 ——
+  systemd 启的应用以前拿不到 `GTK_IM_MODULE`，现在统一由会话环境提供。新增会话变量改那张表。
 - 两个作用域有意不取这个值：Dux Greeter 的 `hide-after-inactive-ms 0`（登录界面不隐藏光标）；
   matugen `folder-icons.sh` 的 `Inherits=Papirus-Dark`（缺图时的继承链，由 Dotfile 自己的 `config.toml` 调用）。
 - 图标：登录界面（Dux Greeter）固定用系统 profile 里的 `Papirus-Dark`；登录后的图标主题由 matugen 的
