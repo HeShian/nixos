@@ -21,7 +21,7 @@ modules/                          # import-tree 递归加载
       desktop-appearance.nix     # 字体、外观设置、首启种子、GTK 迁移
       desktop-localization.nix   # 语言、输入法、XDG 用户目录
       niri.nix                   # niri 会话与桌面音频
-      dux.nix                    # Shell、Files、Greeter 与共用主题
+      dux.nix                    # Shell、Search、Calendar、Greeter 与共用主题；同文件里的 dux-files 独立成 Aspect
       dotfiles.nix               # live / store 两种链接方式
       networking.nix             # NetworkManager、SSH、代理、Clash
       hardware.nix               # GPU、QEMU Guest
@@ -81,10 +81,10 @@ nixos-rebuild build --flake .#nixos-vm
 - **显示器**：改 `dotfiles/.config/niri/outputs.kdl`（不要用 DMS 的显示设置页，那里写的文件没有 include）。
 - **默认程序 / shell 配置**：`dotfiles/.config/kitty/kitty.conf`、`dotfiles/.config/fish/config.fish`。
 - **配色**：DMS 按壁纸生成；额外应用模板在 `dotfiles/.config/matugen/`，换壁纸后自动执行。
-- **应用与默认关联**：普通应用的安装、默认关联和接线在 `desktop-applications.nix` 内按应用关注点一起维护；Dux 日历、便签与文件管理关联在 `dux.nix` 中。系统、开发与终端工具在 `tools.nix`。这些文件都在 `modules/aspects/features/`。
-- **桌面依赖**：DMS 所需工具与 Dux Files 的缩略图依赖在 `dux.nix`，共用主题在 `dux.nix`，Qt / GTK 主题依赖在 `desktop-appearance.nix`。
+- **应用与默认关联**：普通应用的安装、默认关联和接线在 `desktop-applications.nix` 内按应用关注点一起维护；Dux 日历与便签关联在 `dux.nix` 的 `dux` 里，文件管理与压缩包关联在同一个文件的 `dux-files` 里。系统、开发与终端工具在 `tools.nix`。这些文件都在 `modules/aspects/features/`。
+- **桌面依赖**：DMS 所需工具（`glib`、`dux-gop`、`dux-search`）与共用主题在 `dux`，Dux Files 的缩略图依赖在 `dux-files`，Qt / GTK 主题依赖在 `desktop-appearance.nix`。
 - **录屏**：`Mod+F3` 打开菜单，可选择区域、显示器和系统声音；`Mod+Alt+F3` 直接选区。录制中再次按下任一快捷键停止。文件保存在 XDG 视频目录的 `Recordings/`。
-- **文件管理**：`Mod+E` 打开 Dux Files，`Mod+Alt+E` 打开并平铺窗口。Dux Files 也负责打开和保存对话框。它的守护进程、文件选择器和默认文件关联由 `dux.nix` 中的文件管理配置 管理。
+- **文件管理**：`Mod+E` 打开 Dux Files，`Mod+Alt+E` 打开并平铺窗口。Dux Files 也负责打开和保存对话框。它的守护进程、PATH 覆盖、文件选择器优先级与默认文件关联全在 `dux-files` Aspect 里 —— 换文件管理器时把 `desktop` Role 里的那一行换掉即可（issue #2 第四步）。
 - **快捷键查询**：`Mod+Shift+/` 查看 Niri 内置帮助，`Mod+Ctrl+/` 搜索当前绑定。
 - **壁纸**：登录后 DMS 里选择；首启默认壁纸由 `modules/aspects/features/desktop-appearance.nix` 中的首启种子种下。
 

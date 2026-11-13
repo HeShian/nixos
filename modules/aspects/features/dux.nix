@@ -1,10 +1,15 @@
 {
+  # Dux 全家桶里共享的那一半：Shell、Search、Calendar、GOP、Greeter 与登录前主题。
+  #
+  # Dux Files 是独立 Aspect（den.aspects.dux-files）：它有专属的守护进程覆盖、portal
+  # 选择与 MIME 关联，换文件管理器时要能整体撤掉（issue #2 第四步）。
   den.aspects.dux = { host, ... }: {
     nixos.imports = [
   # Shell、Search、Calendar 与运行依赖
   ({ config, lib, pkgs, ... }: {
         programs.dux-shell.enable = true;
-        programs.dux-search.enable = true; # 文件索引：dfiles 内容搜索 / DMS 启动器
+        # 文件索引同时服务 DMS 启动器与 dfiles 内容搜索，所以留在共享的 dux。
+        programs.dux-search.enable = true;
 
         environment.systemPackages = with pkgs; [
           glib # DMS 使用 gsettings 探测主题
@@ -22,36 +27,6 @@
         # dux-calendar 模块自己还设了 path = [ quickshell ]，同样会覆盖会话 PATH；
         # quickshell 已在系统 profile 里，清空 path 让 dcal 继承会话 PATH。
         systemd.user.services.dcal.path = lib.mkForce [ ];
-      })
-
-  # Files 守护进程与文件选择器
-  ({ config, lib, ... }: {
-        # Dux Files：常驻文件管理器 + portal 打开/保存对话框后端。
-        # systemd 服务用 `dfiles run --session --hidden --keep-running`，
-        # 关窗只是隐藏，下次呼出是热启动。
-        programs.dux-files = {
-          enable = true;
-          systemd.enable = true;
-          portal.enable = true; # 注册 org.freedesktop.impl.portal.desktop.dfiles
-        };
-        # 软件包和 NixOS 模块均提供 dfiles.service；覆盖前先清空软件包的 ExecStart。
-        systemd.user.services.dfiles.serviceConfig.ExecStart = lib.mkForce [
-          ""
-          "${lib.getExe config.programs.dux-files.package} run --session --hidden --keep-running"
-        ];
-        # dfiles 在守护进程里按桌面项的 Exec 名启动应用（dms / imv / celluloid / mpv…），
-        # 而 NixOS 默认给 systemd 单元追加最小 PATH（coreutils/findutils/systemd），
-        # 会覆盖用户管理器从会话导入的 PATH，导致双击文件时 exec 找不到程序，
-        # 弹出「无法处理此项目」。与 dms.service / niri 一样关掉默认 PATH，
-        # 让 dfiles 继承会话 PATH（系统 profile、HM profile、flatpak 等）。
-        systemd.user.services.dfiles.enableDefaultPath = false;
-
-        # nixpkgs 的 programs.niri 默认把 FileChooser 交给 gtk；
-        # 这里改成 dfiles 优先、gtk 兜底（Flatpak / Firefox / Chromium 的对话框走这里）。
-        xdg.portal.config.niri."org.freedesktop.impl.portal.FileChooser" = lib.mkForce [
-          "dfiles"
-          "gtk"
-        ];
       })
 
   # Greeter 登录界面
@@ -121,7 +96,48 @@
           "text/markdown" = [ "dev.duxlabs.shell.notepad.desktop" ];
         };
       }; })
+];
+  };
 
+  # Dux Files：常驻文件管理器 + portal 打开/保存对话框后端。
+  #
+  # 这里是它的全部归属：守护进程与 PATH 覆盖、FileChooser 优先级、目录与压缩包
+  # 关联、缩略图依赖。把 dux-files 从 Role 里去掉，这些设置应当一并消失。
+  den.aspects.dux-files = {
+    nixos.imports = [
+  # Files 守护进程与文件选择器
+  ({ config, lib, ... }: {
+        # Dux Files：常驻文件管理器 + portal 打开/保存对话框后端。
+        # systemd 服务用 `dfiles run --session --hidden --keep-running`，
+        # 关窗只是隐藏，下次呼出是热启动。
+        programs.dux-files = {
+          enable = true;
+          systemd.enable = true;
+          portal.enable = true; # 注册 org.freedesktop.impl.portal.desktop.dfiles
+        };
+        # 软件包和 NixOS 模块均提供 dfiles.service；覆盖前先清空软件包的 ExecStart。
+        systemd.user.services.dfiles.serviceConfig.ExecStart = lib.mkForce [
+          ""
+          "${lib.getExe config.programs.dux-files.package} run --session --hidden --keep-running"
+        ];
+        # dfiles 在守护进程里按桌面项的 Exec 名启动应用（dms / imv / celluloid / mpv…），
+        # 而 NixOS 默认给 systemd 单元追加最小 PATH（coreutils/findutils/systemd），
+        # 会覆盖用户管理器从会话导入的 PATH，导致双击文件时 exec 找不到程序，
+        # 弹出「无法处理此项目」。与 dms.service / niri 一样关掉默认 PATH，
+        # 让 dfiles 继承会话 PATH（系统 profile、HM profile、flatpak 等）。
+        systemd.user.services.dfiles.enableDefaultPath = false;
+
+        # nixpkgs 的 programs.niri 默认把 FileChooser 交给 gtk；
+        # 这里改成 dfiles 优先、gtk 兜底（Flatpak / Firefox / Chromium 的对话框走这里）。
+        # 撤掉本 Aspect 时，这里的选择随 include 一起消失，回到 niri 的默认。
+        xdg.portal.config.niri."org.freedesktop.impl.portal.FileChooser" = lib.mkForce [
+          "dfiles"
+          "gtk"
+        ];
+      })
+];
+
+    homeManager.imports = [
   # 文件管理关联与缩略图依赖
   ({ pkgs, ... }: {
         # Dux Files 通过 freedesktop 缩略图器生成预览。
