@@ -1,3 +1,29 @@
+{ ... }:
+let
+  # 路径以 Nix 求值结果为唯一权威：HM 激活是 systemd 服务（home-manager-<user>.service），
+  # Environment 里没有 XDG_*，所以「环境优先」在激活里恒等于默认值，只会绕过
+  # config.xdg.*（ADR-0007）。会话侧的 matugen 脚本用同一套默认值，由 checks 对照。
+  mkPaths =
+    config:
+    {
+      config = config.xdg.configHome;
+      data = config.xdg.dataHome;
+      cache = config.xdg.cacheHome;
+      state = config.xdg.stateHome;
+      pictures = config.xdg.userDirs.pictures;
+      templates = config.xdg.userDirs.templates;
+    };
+
+  scriptsFor = import ../../_lib/appearance-scripts.nix;
+
+  # activation 接线：脚本自己实现 --dry-run，这里只把 HM 的 DRY_RUN 传下去。
+  mkActivation =
+    script: args: ''
+      dry_run=()
+      if [[ -v DRY_RUN ]]; then dry_run+=(--dry-run); fi
+      ${script} ${args} "''${dry_run[@]}"
+    '';
+in
 {
   den.aspects.desktop-appearance = {
     nixos = { pkgs, ... }: {
@@ -66,9 +92,12 @@
         '';
       })
 
-  # 首启种子：保留已有运行时设置
+  # 首启种子与 DMS 缺键补齐：实现在 modules/_lib/scripts/（ADR-0007）
   ({ appearance, config, lib, pkgs, ... }:
       let
+        paths = mkPaths config;
+        scripts = scriptsFor pkgs;
+
         defaultWallpaper = pkgs.nixos-artwork.wallpapers.catppuccin-mocha.gnomeFilePath;
         cavaFallback = pkgs.writeText "cava-theme-fallback" ''
           [color]
@@ -82,182 +111,54 @@
         );
         shellTemplate = pkgs.writeText "new.sh" "#!/usr/bin/env bash\n";
 
-        seed = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-          pictures="$HOME/Pictures"
-          wallDir="$pictures/Wallpapers"
-          dmsState="$HOME/.local/state/dms"
-
-          install -d "$wallDir" "$dmsState" "$pictures/Screenshots"
-          install -d "$HOME/.config/dgop" "$HOME/.config/yazi" "$HOME/.config/fastfetch" "$HOME/.config/kitty" "$HOME/.config/fuzzel"
-          run install -d "$HOME/.config/cava/themes"
-          if [ ! -e "$HOME/.config/cava/themes/matugen" ]; then
-            run install -m644 ${cavaFallback} "$HOME/.config/cava/themes/matugen"
-          fi
-          if [ ! -e "$HOME/.config/gtk-3.0/bookmarks" ]; then
-            run install -Dm644 ${gtkBookmarks} "$HOME/.config/gtk-3.0/bookmarks"
-          fi
-          if [ ! -e ${lib.escapeShellArg "${config.xdg.userDirs.templates}/new.sh"} ]; then
-            run install -Dm755 ${shellTemplate} ${lib.escapeShellArg "${config.xdg.userDirs.templates}/new.sh"}
-          fi
-
-          # 默认壁纸（DMS 首次启动会用它生成整套配色）
-          if [ ! -e "$wallDir/default.png" ]; then
-            run cp -f ${lib.escapeShellArg defaultWallpaper} "$wallDir/default.png"
-          fi
-
-          # DMS 会话状态：只写一次，后续由 DMS 自己维护
-          if [ ! -s "$dmsState/session.json" ]; then
-            printf '{\n  "wallpaperPath": "%s"\n}\n' "$wallDir/default.png" > "$dmsState/session.json"
-          fi
-
-          # matugen 的输出文件在首次生成前可能不存在，先放空文件避免 include 失败
-          # （dgop 的 colors.json 不需要占位：文件缺失时 dgop 用自己的默认配色）
-          for f in \
-            "$HOME/.config/kitty/dank-theme.conf" \
-            "$HOME/.config/kitty/dank-tabs.conf" \
-            "$HOME/.config/fuzzel/colors.ini"
-          do
-            if [ ! -e "$f" ]; then
-              : > "$f"
-            fi
-          done
-        '';
-
         # DMS 持有运行时设置。只创建首启种子或补齐缺失的默认值。
-        dmsDefaults = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-          if [[ ! -v DRY_RUN ]]; then (
-            config_dir=${lib.escapeShellArg config.xdg.configHome}
-            config_dir="''${XDG_CONFIG_HOME:-$config_dir}"
-            settings="$config_dir/dms/settings.json"
-            install -d "$config_dir/dms"
+        dmsDefaults = pkgs.writeText "dms-defaults.json" (builtins.toJSON {
+          iconThemeDark = "System Default";
+          iconThemeLight = "System Default";
+          iconThemePerMode = false;
+          cursorSettings = { theme = appearance.cursor.theme; size = appearance.cursor.size; };
+          blurredWallpaperLayer = true;
+          blurWallpaperOnOverview = true;
+        });
 
-            defaults=${lib.escapeShellArg (builtins.toJSON {
-              iconThemeDark = "System Default";
-              iconThemeLight = "System Default";
-              iconThemePerMode = false;
-              cursorSettings = { theme = appearance.cursor.theme; size = appearance.cursor.size; };
-              blurredWallpaperLayer = true;
-              blurWallpaperOnOverview = true;
-            })}
-
-            if [[ ! -L "$settings" ]]; then
-              if [[ ! -e "$settings" ]]; then
-                # noclobber 避免覆盖恰好由 DMS 创建的文件。
-                (set -o noclobber; printf '%s\n' "$defaults" > "$settings") || [[ -f "$settings" ]]
-              elif [[ -f "$settings" ]]; then
-                snapshot=$(mktemp "$settings.hm-original.XXXXXX")
-                updated=
-                trap 'rm -f "$snapshot" "''${updated:-$snapshot}"' EXIT
-                updated=$(mktemp "$settings.hm-updated.XXXXXX")
-                cp -- "$settings" "$snapshot"
-                # 只有缺键才生成候选。已有值（含 false/null）全部保留。
-                if ${pkgs.jq}/bin/jq -e --argjson defaults "$defaults" '
-                  if type == "object" and ($defaults + .) != .
-                  then $defaults + . else empty end
-                ' "$snapshot" > "$updated" 2>/dev/null \
-                  && cmp -s "$settings" "$snapshot"; then
-                  chmod --reference="$settings" "$updated"
-                  mv -f -- "$updated" "$settings"
-                fi
-              fi
-            fi
-          ); fi
-        '';
+        seedArgs = lib.concatStringsSep " " [
+          "--config" (lib.escapeShellArg paths.config)
+          "--state" (lib.escapeShellArg paths.state)
+          "--pictures" (lib.escapeShellArg paths.pictures)
+          "--templates" (lib.escapeShellArg paths.templates)
+          "--wallpaper" (lib.escapeShellArg defaultWallpaper)
+          "--bookmarks" (lib.escapeShellArg gtkBookmarks)
+          "--shell-template" (lib.escapeShellArg shellTemplate)
+          "--cava-fallback" (lib.escapeShellArg cavaFallback)
+        ];
+        defaultsArgs = lib.concatStringsSep " " [
+          "--settings" (lib.escapeShellArg "${paths.config}/dms/settings.json")
+          "--defaults" (lib.escapeShellArg dmsDefaults)
+        ];
       in
       {
-        home.activation.dms-appearance-seed = seed;
-        home.activation.dms-theme-defaults = dmsDefaults;
+        home.activation.dms-appearance-seed = lib.hm.dag.entryAfter [ "writeBoundary" ]
+          (mkActivation "${scripts.seed}/bin/seed-appearance" seedArgs);
+        home.activation.dms-theme-defaults = lib.hm.dag.entryAfter [ "writeBoundary" ]
+          (mkActivation "${scripts.dmsDefaults}/bin/dms-defaults" defaultsArgs);
       })
 
   # 上代遗留迁移：备份与用户设置保护
   ({ appearance, config, lib, pkgs, ... }:
+      let
+        paths = mkPaths config;
+        scripts = scriptsFor pkgs;
+        args = lib.concatStringsSep " " [
+          "--config" (lib.escapeShellArg paths.config)
+          "--data" (lib.escapeShellArg paths.data)
+          "--cache" (lib.escapeShellArg paths.cache)
+          "--icon-theme" (lib.escapeShellArg appearance.icons.fallback)
+          "--cursor-theme" (lib.escapeShellArg appearance.cursor.theme)
+        ];
+      in
       {
-        home.activation.gtk-legacy-cleanup = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-          if [[ ! -v DRY_RUN ]]; then (
-            config_dir=${lib.escapeShellArg config.xdg.configHome}
-            config_dir="''${XDG_CONFIG_HOME:-$config_dir}"
-            data_dir=${lib.escapeShellArg config.xdg.dataHome}
-            data_dir="''${XDG_DATA_HOME:-$data_dir}"
-            cache_dir=${lib.escapeShellArg config.xdg.cacheHome}
-            cache_dir="''${XDG_CACHE_HOME:-$cache_dir}"
-            # 与 matugen 的 folder-icons.sh 共用锁。持锁后才读取 GTK 当前主题。
-            install -d "$data_dir/icons"
-            exec 9>"$data_dir/icons/.adwaita-matugen.lock"
-            ${lib.getExe' pkgs.util-linux "flock"} 9
-
-            read_ini_key() {
-              sed -nE "s/^[[:space:]]*$2[[:space:]]*=[[:space:]]*(.*[^[:space:]])[[:space:]]*$/\1/p" "$1" | head -1
-            }
-
-            set_ini_key() {
-              local file="$1" key="$2" value="$3"
-              if grep -Eq "^[[:space:]]*$key[[:space:]]*=" "$file"; then
-                sed -i -E "s|^[[:space:]]*$key[[:space:]]*=.*|$key=$value|" "$file"
-              elif grep -Eq '^\[Settings\][[:space:]]*$' "$file"; then
-                sed -i -E "/^\[Settings\][[:space:]]*$/a $key=$value" "$file"
-              else
-                printf '\n[Settings]\n%s=%s\n' "$key" "$value" >> "$file"
-              fi
-            }
-
-            backup=
-            for v in 3.0 4.0; do
-              dir="$config_dir/gtk-$v"
-              install -d "$dir"
-              css="$dir/gtk.css"
-              settings="$dir/settings.ini"
-
-              icon_theme=
-              cursor_theme=
-              if [[ -f "$settings" && ! -L "$settings" ]]; then
-                icon_theme="$(read_ini_key "$settings" gtk-icon-theme-name)"
-                cursor_theme="$(read_ini_key "$settings" gtk-cursor-theme-name)"
-              fi
-
-              legacy_css=false
-              if [[ -f "$dir/noctalia.css" ]] || { [[ -f "$css" && ! -L "$css" ]] && grep -Eq '^[[:space:]]*@import.*noctalia\.css' "$css"; }; then
-                legacy_css=true
-              fi
-              legacy_theme=false
-              case "$icon_theme" in breeze|breeze-dark|Breeze|Breeze-Dark) legacy_theme=true ;; esac
-              if [[ "$cursor_theme" == breeze_cursors ]]; then legacy_theme=true; fi
-              if $legacy_css || $legacy_theme; then
-                if [[ -z "$backup" ]]; then
-                  install -d "$cache_dir/nixos-migration-backup"
-                  backup=$(mktemp -d "$cache_dir/nixos-migration-backup/gtk-XXXXXXXX")
-                fi
-                cp -a "$dir" "$backup/gtk-$v"
-                if $legacy_css; then rm -f "$dir/noctalia.css" "$dir/noctalia-extensions.css"; fi
-              fi
-
-              if [[ ! -L "$css" ]]; then
-                if $legacy_css && [[ -f "$css" ]] && grep -Eq '^[[:space:]]*@import.*noctalia\.css' "$css"; then
-                  sed -i -E '/^[[:space:]]*@import.*noctalia\.css/d' "$css"
-                fi
-                if ! grep -Eq '^[[:space:]]*@import.*dank-colors\.css' "$css" 2>/dev/null; then
-                  tmp=$(mktemp "$dir/.gtk.css.XXXXXX")
-                  {
-                    printf '@import url("dank-colors.css");\n'
-                    if [[ -f "$css" ]]; then cat "$css"; fi
-                  } > "$tmp"
-                  mv -f "$tmp" "$css"
-                fi
-              fi
-
-              if [[ ! -L "$settings" ]]; then
-                if [[ ! -e "$settings" ]]; then printf '[Settings]\n' > "$settings"; fi
-                case "$icon_theme" in
-                  ""|breeze|breeze-dark|Breeze|Breeze-Dark|default|Default)
-                    set_ini_key "$settings" gtk-icon-theme-name ${lib.escapeShellArg appearance.icons.fallback} ;;
-                esac
-                case "$cursor_theme" in
-                  ""|breeze_cursors|default|Default)
-                    set_ini_key "$settings" gtk-cursor-theme-name ${lib.escapeShellArg appearance.cursor.theme} ;;
-                esac
-              fi
-            done
-          ); fi
-        '';
+        home.activation.gtk-legacy-cleanup = lib.hm.dag.entryAfter [ "writeBoundary" ]
+          (mkActivation "${scripts.gtkLegacyCleanup}/bin/gtk-legacy-cleanup" args);
       })
 ];
   };
