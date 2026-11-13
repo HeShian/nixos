@@ -48,6 +48,10 @@ _Avoid_: 软链模式
 把 `~/.config` 链到 flake store 的链接方式；内容是只读快照，构建后生效，用于 VM。
 _Avoid_: Nix 模式
 
+**外观值（appearance）**：
+由 Nix 产生、被多个作用域各取一份的外观常量（光标主题与尺寸、图标 fallback），集中在 `modules/_lib/appearance.nix`，通过模块参数 `appearance` 分发。不是 Aspect：它没有自己的配置。
+_Avoid_: 主题、样式值（会与 DMS 运行时生成的主题混淆）
+
 ### 状态与遗留
 
 **运行时生成文件**：
@@ -65,7 +69,7 @@ _Avoid_: 死代码（未必该删）
 ### 重复
 
 **值重复**：
-同一个值在多个作用域各写一份（如光标主题同时出现在合成器配置、会话变量、dconf、DMS 种子与登录界面配置里）。各写点互不冲突，但改值必须同步所有位置。
+同一个值在多个作用域各写一份（如输入法环境变量同时出现在 niri 的 `config.kdl` 与 `desktop-localization.nix`，`Papirus-Dark` 同时出现在登录界面、GTK 迁移 fallback 与 matugen 脚本里）。各写点互不冲突，但改值必须同步所有位置；能收成单一来源的应收进「外观值」这类位置。
 _Avoid_: 重复（未区分性质）
 
 **写点冲突**：

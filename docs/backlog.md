@@ -20,6 +20,7 @@
 - [ ] **`niri-pick` 的 rofi / hyprpicker fallback 分支** —— 工具未安装，但属于有意的降级链，**不删**；仅记录以免下次被当死代码清掉。
 - [ ] **`programs.nh.flake` 在 VM 为 `null`** —— VM 里没有仓库克隆，`nh os switch` 无法工作。触发：需要在 VM 内自建时（克隆仓库或改 remote build）。
 - [ ] **`AGENTS.md` 缺常用命令** —— 构建/切换命令只写在 README，agent 入口没有。触发：下一个 agent 又问"怎么构建"时补一行。
+- [ ] **登录界面缩放与 `outputs.kdl` 重复** —— `dux.nix` 的 Greeter `customConfig` 写 `output "eDP-1" { scale 1.25 }`，`dotfiles/.config/niri/outputs.kdl` 也写 1.25。它是「输出事实」不是外观值，没有进 ADR-0006 的单一来源。触发：新增显示器或改缩放、需要同时改登录界面时。
 
 ## 运维
 

@@ -12,6 +12,7 @@ dotfiles/                         # 经常改的纯文本配置（活链接源�
 modules/                          # import-tree 递归加载
   flake-parts.nix                   # Den 的 flake 接入（flake-parts 模块）
   nh.nix                          # perSystem：把每台 host 暴露成 `nix build .#acer`
+  checks.nix                      # perSystem checks：外观值四处渲染面与唯一来源一致
   aspects/
     den.nix                       # den.hosts 声明 + den.schema
     defaults.nix                  # den.default：所有实体的全局默认
@@ -29,7 +30,9 @@ modules/                          # import-tree 递归加载
     roles/                        # 组合 aspect：desktop = 桌面这一组 feature 的集合
     hosts/                        # acer、nixos-vm（host aspect：硬件 + 引入哪些 aspect）
     users/                        # claudia、user-vm（user aspect：身份与 git）
-  _lib/                           # 非 aspect 的辅助函数（import-tree 忽略 _ 前缀）
+  _lib/                           # 非 aspect 的辅助代码（import-tree 忽略 _ 前缀）
+    appearance.nix                # 外观值唯一来源（光标、图标 fallback），见 ADR-0006
+    dotfiles.nix                  # dotfiles 链接实现
 ```
 
 > 目录结构参考 Den 的两个官方模板（上游 `github:denful/den`，本仓库 `flake.lock` pin 在 `bf2504f9f2e8621fee091335132ab3ae698cf808`）：
@@ -57,6 +60,9 @@ git add -A
 # 只构建验证（不需要 root）
 nixos-rebuild build --flake .#acer
 
+# 回归检查：评估两台 Host、构建外观值检查
+nix flake check
+
 # 正式切换
 sudo nixos-rebuild switch --flake .#acer
 ```
@@ -82,12 +88,15 @@ nixos-rebuild build --flake .#nixos-vm
 
 ## 主题 / 图标 / 光标
 
+- 光标：`Bibata-Modern-Ice`，24px，装在系统 profile。值只有一处来源：`modules/_lib/appearance.nix`。它分发给
+  四个渲染面 —— niri 会话变量 `XCURSOR_*`（systemd 用户服务等非 niri 子进程）、dconf（GTK）、DMS
+  `settings.json` 首启种子（DMS 界面初始值）、Dux Greeter 的 compositor 配置（登录界面）—— 并生成
+  `~/.config/niri/appearance.kdl` 给 niri 的 `cursor {}` 用。改光标只改那个文件（ADR-0006）。
+- 两个作用域有意不取这个值：Dux Greeter 的 `hide-after-inactive-ms 0`（登录界面不隐藏光标）；
+  matugen `folder-icons.sh` 的 `Inherits=Papirus-Dark`（缺图时的继承链，由 Dotfile 自己的 `config.toml` 调用）。
 - 图标：登录界面（Dux Greeter）固定用系统 profile 里的 `Papirus-Dark`；登录后的图标主题由 matugen 的
   `folder-icons.sh` 生成 `Adwaita-Matugen-*`，写入 dconf 与 `~/.config/gtk-{3,4}.0/settings.ini`，
-  DMS 设置里保持 `System Default` 跟随系统。光标：`Bibata-Modern-Ice`，24px，装在系统 profile。
-- 光标的值出现在五处、各管一个作用域：niri `cursor {}`（合成器）、HM 会话变量 `XCURSOR_*`（systemd 用户服务等
-  非 niri 子进程）、dconf（GTK）、DMS `settings.json` 种子（DMS 界面初始值）、Dux Greeter 的 compositor 配置
-  （登录界面）。改光标时五处要一起改。
+  DMS 设置里保持 `System Default` 跟随系统。
 - `desktop-appearance.nix` 中的首启种子在首次激活时写入 DMS 默认设置，之后只补齐缺失的键。已有值可在 DMS 中修改。
 - Home Manager 激活时会备份已知的 Noctalia / KDE 上代遗留到 XDG 缓存目录下的 `nixos-migration-backup/`。它移除旧样式导入、修复 Breeze 图标和光标，并保留其他用户设置。GTK 迁移与 matugen 使用同一个锁来更新图标主题。
 - fcitx5 主题：DMS 的 matugen 会生成 `~/.local/share/fcitx5/themes/dms`，系统配置写 `Theme=dms`；
