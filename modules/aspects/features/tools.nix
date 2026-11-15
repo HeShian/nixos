@@ -3,6 +3,8 @@
     nixos = { pkgs, ... }: {
       environment.systemPackages = with pkgs; [ curl git net-tools ];
 
+      programs.nix-ld.enable = true;
+
       programs.nh = {
         enable = true;
         clean = {
