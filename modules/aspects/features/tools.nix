@@ -27,7 +27,8 @@
     };
       # 终端配置由 Dotfile 管理，安装程序不生成同名配置。
       home.packages = with pkgs; [
-        python3 uv nodejs codex deepseek-harness
+        # pnpm 由 nixpkgs 直接提供（不走 corepack 运行时下载），与 nodejs 同代升级。
+        python3 uv nodejs pnpm codex deepseek-harness
         kitty fish starship zoxide yazi bat eza xdg-terminal-exec
       ];
     };
