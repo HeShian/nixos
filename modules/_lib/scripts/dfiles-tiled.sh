@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Mod+Alt+E：新开一个 Dux Files 窗口，并把它切到平铺布局。
 #
-# dfiles 的窗口默认被 niri 当成浮动窗口（windowrules.kdl 里还给它设了
+# dfiles 的窗口默认被 niri 当成浮动窗口（dux-files.kdl 里还给它设了
 # 897×543 的默认浮窗尺寸），所以打开后用 niri IPC 按窗口 id 切回平铺。
 set -uo pipefail
 

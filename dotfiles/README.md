@@ -69,5 +69,4 @@ DMS 和 matugen 会覆盖这些文件：
 - `screen-record`：`Mod+F3` 打开菜单，`Mod+Alt+F3` 直接选区，录制中再次按任一快捷键停止。
 - `wallpaper-random`：`Mod+F10`，DMS 下一张壁纸。
 - `wallpaper-download`：`Mod+Shift+F10`，下载随机壁纸并交给 DMS。
-- `dfiles-tiled`：`Mod+Alt+E`，新开 Dux Files 窗口并切到平铺（dfiles 默认是浮窗）。
 - `annotate-image`：`Mod+Shift+S`，标注图片——剪贴板里有图就标注它，否则先区域截图再标注（satty）。

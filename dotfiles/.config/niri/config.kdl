@@ -13,6 +13,8 @@ include "windowrules.kdl"
 include "supertab.kdl"
 include "binds.kdl"
 include "outputs.kdl"
+// 随 dux-files Aspect 安装，首次启用、撤除和回滚时允许缺失。
+include optional=true "dux-files.kdl"
 
 // 外观初值（光标），由 Home Manager 生成（ADR-0006）。放在 dms/cursor.kdl 之前，
 // 让 DMS 光标设置页的改动能覆盖它。

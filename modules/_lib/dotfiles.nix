@@ -52,6 +52,16 @@ let
   };
 in
 {
+  # 旧代际曾把这两个目录整体链接出去。拒绝沿着旧链接写入任何文件。
+  home.activation.checkDotfileDirectoryLinks = lib.hm.dag.entryBefore [ "checkLinkTargets" "writeBoundary" ] ''
+    for dir in ${lib.escapeShellArg config.xdg.configHome}/{matugen,niri/scripts}; do
+      if [[ -L "$dir" ]]; then
+        printf 'Dotfile 迁移：%s 仍为目录软链。确认目标后移除该软链，再重新激活。\n' "$dir" >&2
+        exit 1
+      fi
+    done
+  '';
+
   xdg.configFile =
     builtins.listToAttrs (
       map (rel: {

@@ -1,3 +1,6 @@
+let
+  fcitxTheme = "dms-png";
+in
 {
   den.aspects.desktop-localization = {
     nixos.imports = [
@@ -130,10 +133,9 @@
                   PreferTextIcon = "False";
                   ShowLayoutNameInIcon = "True";
                   UseInputMethodLanguageToDisplayText = "True";
-                  # Dux Shell 的 matugen 模板会生成 ~/.local/share/fcitx5/themes/dms，
-                  # 并在换壁纸后通过 D-Bus 重载 classicui；这里只指定主题名。
-                  Theme = "dms";
-                  DarkTheme = "dms";
+                  # dms 是 Dux 生成的源主题。dms-png 由本 Aspect 发布给 classicui。
+                  Theme = fcitxTheme;
+                  DarkTheme = fcitxTheme;
                   UseDarkTheme = "False";
                   UseAccentColor = "True";
                   PerScreenDPI = "False";
@@ -163,7 +165,10 @@
   # 输入法用户配置与 Dux 主题联动
   ({ config, lib, pkgs, ... }:
       let
-        themeDir = "${config.xdg.dataHome}/fcitx5/themes/dms";
+        themes = "${config.xdg.dataHome}/fcitx5/themes";
+        sourceTheme = "${themes}/dms";
+        pngTheme = "${themes}/${fcitxTheme}";
+        converter = import ../../_lib/fcitx5-png.nix pkgs;
         classicUiConfig = "${config.xdg.configHome}/fcitx5/conf/classicui.conf";
       in {
         # 微信的 Qt 输入法只从用户目录读取 classicui.conf。
@@ -177,21 +182,24 @@
         # Dux 重新生成配色后，将候选框资源转为微信内置 Qt 能读取的 PNG。
         systemd.user.paths.fcitx5-dms-png = {
           Unit.Description = "Watch the Dux Fcitx5 theme";
-          Path.PathChanged = map (file: "${themeDir}/${file}") [ "theme.conf" "panel.svg" "highlight.svg" ];
+          Path.PathChanged = [ sourceTheme ] ++
+            map (file: "${sourceTheme}/${file}") [ "theme.conf" "panel.svg" "highlight.svg" ];
           Install.WantedBy = [ "graphical-session.target" ];
         };
         systemd.user.services.fcitx5-dms-png = {
           Unit = {
             Description = "Convert the Dux Fcitx5 theme to PNG";
-            # One theme change can write all three inputs and trigger a second run
-            # when the converter replaces theme.conf. Keep watching during bursts.
+            # Dux may write several files per palette update.
             StartLimitIntervalSec = 0;
           };
           Service = {
             Type = "oneshot";
-            Environment = "PATH=${lib.makeBinPath [ pkgs.imagemagick pkgs.coreutils pkgs.diffutils pkgs.gawk pkgs.systemd ]}";
             ExecStartPre = "${pkgs.coreutils}/bin/sleep 0.3";
-            ExecStart = ''${pkgs.bash}/bin/bash "${config.xdg.configHome}/matugen/fcitx5-png.sh" "${themeDir}"'';
+            ExecStart = lib.hm.strings.escapeSystemdExecArgs [
+              (lib.getExe converter)
+              sourceTheme
+              pngTheme
+            ];
           };
           Install.WantedBy = [ "graphical-session.target" ];
         };

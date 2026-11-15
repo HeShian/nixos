@@ -63,22 +63,6 @@ window-rule {
     opacity 1.0
 }
 
-// ── Dux Files 主窗口：Mod+E 打开时沿用当前浮窗尺寸（897×543） ───────────────
-// 这条规则对所有 dfiles 窗口生效；Mod+Alt+E 由 dfiles-tiled 脚本在打开后切回平铺。
-window-rule {
-    match app-id=r#"^dev\.duxlabs\.files$"#
-    open-floating true
-    default-column-width { fixed 897; }
-    default-window-height { fixed 543; }
-}
-
-// ── Dux Files 的 portal 文件对话框：浮动 ────────────────────────────────────
-// 对话框带着调用方的 app-id 和 Open/Save 之类的标题，见 dux files 的 Desktop Integration。
-window-rule {
-    match app-id=r#"^dev\.duxlabs\.files$"# title=r#"^(Open|Save|Select|Upload|Export|Import)"#
-    open-floating true
-}
-
 // ── Steam ───────────────────────────────────────────────────────────────────
 window-rule {
     match app-id=r#"^steam$"# title=r#"^(Friends List|好友列表)$"#

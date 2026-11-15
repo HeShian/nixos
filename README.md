@@ -33,8 +33,9 @@ modules/                          # import-tree 递归加载
   _lib/                           # 非 aspect 的辅助代码（import-tree 忽略 _ 前缀）
     appearance.nix                # 外观值唯一来源（光标、图标 fallback），见 ADR-0006
     session-env.nix               # 会话环境表唯一来源（输入法 / 默认程序 / 光标），见 ADR-0008
+    appearance-activation.nix     # 外观 activation 接线，生产与检查共用
     appearance-scripts.nix        # 打包三个 activation 脚本（writeShellApplication）
-    scripts/                      # seed-appearance / dms-defaults / gtk-legacy-cleanup，见 ADR-0007
+    scripts/                      # 外观激活、Dux Files 平铺和 Fcitx5 主题发布
     dotfiles.nix                  # dotfiles 链接实现：条目由树递归生成，见 ADR-0009
 ```
 
@@ -55,7 +56,7 @@ modules/                          # import-tree 递归加载
 ## 应用配置
 
 首次切换前建议先 `git add -A`（flake 在 git 仓库中只打包已跟踪文件；VM 的 dotfiles 软链依赖这一点）。
-从旧的**目录级**链接布局升级时，先 `rm -f ~/.config/matugen ~/.config/niri/scripts` —— 否则 Home Manager 会顺着旧软链把文件写进仓库（见 ADR-0009 的迁移注意）：
+从旧的**目录级**链接布局升级时，Home Manager 会在写入前报出旧软链并停止。确认报出的路径确实是旧软链后，用 `unlink` 移除该链接，再重新激活。正常目录可直接升级（见 ADR-0009）。
 
 ```bash
 cd ~/nixos
@@ -64,7 +65,7 @@ git add -A
 # 只构建验证（不需要 root）
 nixos-rebuild build --flake .#acer
 
-# 回归检查：评估两台 Host、构建外观值检查
+# 回归检查：评估两台 Host，运行桌面配置检查
 nix flake check
 
 # 正式切换
@@ -87,9 +88,9 @@ nixos-rebuild build --flake .#nixos-vm
 - **应用与默认关联**：普通应用的安装、默认关联和接线在 `desktop-applications.nix` 内按应用关注点一起维护；Dux 日历与便签关联在 `dux.nix` 的 `dux` 里，文件管理与压缩包关联在同一个文件的 `dux-files` 里。系统、开发与终端工具在 `tools.nix`。这些文件都在 `modules/aspects/features/`。
 - **桌面依赖**：DMS 所需工具（`glib`、`dux-gop`、`dux-search`）与共用主题在 `dux`，Dux Files 的缩略图依赖在 `dux-files`，Qt / GTK 主题依赖在 `desktop-appearance.nix`。
 - **录屏**：`Mod+F3` 打开菜单，可选择区域、显示器和系统声音；`Mod+Alt+F3` 直接选区。录制中再次按下任一快捷键停止。文件保存在 XDG 视频目录的 `Recordings/`。
-- **文件管理**：`Mod+E` 打开 Dux Files，`Mod+Alt+E` 打开并平铺窗口。Dux Files 也负责打开和保存对话框。它的守护进程、PATH 覆盖、文件选择器优先级与默认文件关联全在 `dux-files` Aspect 里 —— 换文件管理器时把 `desktop` Role 里的那一行换掉即可（issue #2 第四步）。
+- **文件管理**：`Mod+E` 打开 Dux Files，`Mod+Alt+E` 打开并平铺窗口。Dux Files 也负责打开和保存对话框。守护进程、PATH 覆盖、文件选择器优先级、默认关联和 niri 接线都随 `dux-files` Aspect 启用或撤除。Dux Files 专用快捷键和窗口规则在 `modules/_lib/dux-files.kdl`，激活后生效。
 - **快捷键查询**：`Mod+Shift+/` 查看 Niri 内置帮助，`Mod+Ctrl+/` 搜索当前绑定。
-- **壁纸**：登录后 DMS 里选择；首启默认壁纸由 `modules/aspects/features/desktop-appearance.nix` 中的首启种子种下。
+- **壁纸**：登录后 DMS 里选择；首启默认壁纸由 `modules/_lib/appearance-activation.nix` 接入的首启种子种下。
 
 ## 主题 / 图标 / 光标
 
@@ -108,18 +109,18 @@ nixos-rebuild build --flake .#nixos-vm
   `folder-icons.sh` 生成 `Adwaita-Matugen-*`，写入 dconf 与 `~/.config/gtk-{3,4}.0/settings.ini`，
   DMS 设置里保持 `System Default` 跟随系统。
 - 首启种子、DMS 缺键补齐与上代遗留迁移的实现在 `modules/_lib/scripts/`，路径由 Nix 求值后显式传入
-  （ADR-0007）；`nix flake check` 会在临时目录里跑这三个脚本，断言幂等、干跑不写盘与已有设置保留。
+  （ADR-0007）。`nix flake check` 会检查脚本的幂等、干跑和已有设置保留，也会在临时目录运行实际求值的 activation 接线，验证非默认 XDG 路径和干跑参数。
 - `seed-appearance` 在首次激活时写入 DMS 默认设置与桌面占位文件，`dms-defaults` 之后只补齐缺失的键。
   已有值可在 DMS 中修改。
 - Home Manager 激活时会备份已知的 Noctalia / KDE 上代遗留到 XDG 缓存目录下的 `nixos-migration-backup/`。它移除旧样式导入、修复 Breeze 图标和光标，并保留其他用户设置。GTK 迁移与 matugen 用同一个 `~/.local/share/icons/.adwaita-matugen.lock` 串行化。
-- fcitx5 主题：DMS 的 matugen 会生成 `~/.local/share/fcitx5/themes/dms`，系统配置写 `Theme=dms`；
-  DMS 生成主题后通过 D-Bus 重载 classicui（手动重启：`pkill fcitx5; fcitx5 -d` 或 `Mod+F1`）。
+- Fcitx5 主题：Dux 生成 `fcitx5/themes/dms` 源主题，`fcitx5-dms-png` 将转好的 PNG 和配置一起发布到 XDG 数据目录下的 `fcitx5/themes/dms-png`，再通过 D-Bus 重载 classicui。
+  系统设置选择 `dms-png`。若用户自己的 `classicui.conf` 仍选 `dms`，可在 Fcitx5 设置里改为 DMS PNG。
 - GTK 3/4 的用户样式导入 Dux 生成的 `dank-colors.css`。CAVA 使用 Matugen 生成的主题。
 - VS Code 的 `Dynamic Base16 DankShell` 扩展由 `desktop-applications.nix` 中的 VS Code 激活脚本执行 `vscode --install-extension` 装到可写扩展目录（不是 Home Manager 直接装包），Dux 随壁纸更新配色。已有 VS Code 用户设置可在主题菜单选用此主题。
 - Fish 中的 `f` 用本地壁纸为 Kitty 中的 Fastfetch 更换图标，`fwatch` 定时刷新，`raw` 下载随机壁纸。
 - `dotfiles/.config/matugen/config.toml` 的第一行必须是 `[config]`，注释里不要出现
   `[config]` / `[templates...]` 字面量，否则 DMS 截取配置时会生成非法 TOML。
-- **Overview（Mod+O / Mod+G）的暗色模糊壁纸**：`desktop-appearance.nix` 中的首启种子首次把 `blurredWallpaperLayer=true`
+- **Overview（Mod+O / Mod+G）的暗色模糊壁纸**：外观激活的首启种子首次把 `blurredWallpaperLayer=true`
   写进 DMS 设置；`dotfiles/.config/niri/windowrules.kdl` 里的
   `layer-rule { match namespace="dms:blurwallpaper"; place-within-backdrop true }` 把它放进 overview 的 backdrop。
   `dotfiles/.config/niri/config.kdl` 另外 `include optional=true "dms/wpblur.kdl"`（该文件由 DMS 生成，仓库里没有）。

@@ -18,8 +18,6 @@ binds {
     Mod+T hotkey-overlay-title="共享终端 Terminal" { spawn "kitty" "--single-instance"; }
     Mod+Return hotkey-overlay-title="独立终端 Terminal" { spawn "kitty"; }
     Mod+P hotkey-overlay-title="提取窗口信息 Pick window info" { spawn "~/.config/niri/scripts/niri-pick" "focus"; }
-    Mod+E hotkey-overlay-title="文件管理器 Dux Files" { spawn "dfiles" "show"; }
-    Mod+Alt+E hotkey-overlay-title="平铺文件管理器 Dux Files" { spawn "~/.config/niri/scripts/dfiles-tiled"; }
     Mod+Shift+M hotkey-overlay-title="系统监视器 Dux GOP" { spawn "kitty" "--single-instance" "--class" "quickterminal" "-e" "dgop" "top"; }
     Mod+Z hotkey-overlay-title="程序菜单 App launcher" { spawn-sh "dms ipc call spotlight toggle || fuzzel"; }
     Mod+Alt+O hotkey-overlay-title="Codex" { spawn "kitty" "--class" "quickterminal" "-e" "codex"; }

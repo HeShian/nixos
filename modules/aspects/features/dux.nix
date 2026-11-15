@@ -138,8 +138,19 @@
 ];
 
     homeManager.imports = [
-  # 文件管理关联与缩略图依赖
-  ({ pkgs, ... }: {
+  # niri 接线、文件管理关联与缩略图依赖
+  ({ pkgs, osConfig, lib, ... }:
+      let
+        tiled = pkgs.writeShellApplication {
+          name = "dfiles-tiled";
+          runtimeInputs = [ pkgs.niri pkgs.jq pkgs.coreutils osConfig.programs.dux-files.package ];
+          text = builtins.readFile ../../_lib/scripts/dfiles-tiled.sh;
+        };
+      in {
+        xdg.configFile."niri/dux-files.kdl".text =
+          lib.replaceStrings [ "@tiled@" ] [ (lib.getExe tiled) ]
+            (builtins.readFile ../../_lib/dux-files.kdl);
+
         # Dux Files 通过 freedesktop 缩略图器生成预览。
         home.packages = with pkgs; [
           ffmpegthumbnailer

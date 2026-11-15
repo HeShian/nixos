@@ -1,8 +1,8 @@
-# 外观与 activation 脚本的回归检查。
+# 桌面配置和 activation 脚本的回归检查。
 #
 # 值检查不写死具体值：改光标只改 appearance 模块，检查跟着变；谁把字面量改回消费点，
 # 检查会在求值阶段失败。脚本检查用临时目录跑真实脚本，断言种子、幂等、干跑与用户设置保留。
-{ self, lib, ... }:
+{ self, inputs, lib, ... }:
 {
   perSystem =
     { pkgs, ... }:
@@ -296,6 +296,10 @@
     {
       checks =
         builtins.listToAttrs (map checkFor desktopHosts)
+        // (import ./_lib/desktop-checks.nix {
+          inherit self lib pkgs appearance desktopHosts;
+          inherit (inputs) home-manager;
+        })
         // {
           appearance-scripts-seed = seedScriptCheck;
           appearance-scripts-dms-defaults = dmsScriptCheck;

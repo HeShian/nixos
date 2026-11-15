@@ -6,7 +6,7 @@ Status: accepted
 
 ## 决定
 
-1. 三段 shell 移入 `modules/_lib/scripts/*.sh`，由 `modules/_lib/appearance-scripts.nix` 用 `pkgs.writeShellApplication` 打包（构建期 shellcheck，`runtimeInputs` 声明命令依赖）；activation 只负责接线。
+1. 三段 shell 移入 `modules/_lib/scripts/*.sh`，由 `modules/_lib/appearance-scripts.nix` 用 `pkgs.writeShellApplication` 打包（构建期 shellcheck，`runtimeInputs` 声明命令依赖）；由 `modules/_lib/appearance-activation.nix` 接入 Home Manager。
 2. 脚本的 interface 是显式参数：`--config/--data/--cache/--state/--pictures/--templates` 与具体输入文件；脚本里不再出现 `$HOME` 或 `${XDG_*:-…}`。
 3. 路径以 Nix 求值结果为唯一权威。HM 激活是 systemd 服务 `home-manager-<user>.service`（`User=<user>`），其 `Environment=` 里没有 `XDG_*`，会话侧当前也没有 ——「环境优先」在激活里恒等于默认值，只会绕过 `config.xdg.*`。
 4. `--dry-run` 由脚本自己处理：activation 只在 HM 的 `DRY_RUN` 存在时传下去。种子逐动作回显；GTK 迁移在干跑时只做分析并打印结论，不建目录、不加锁、不写文件。
@@ -17,10 +17,10 @@ Status: accepted
 
 - `fcitx5-classicui-link`（一行链接）与 `dms-vscode-theme`（应用接线）没有生命周期问题，仍留在各自 Aspect 里。
 - `folder-icons.sh` 是 Dotfile 脚本，不由 Nix 打包；它与迁移脚本的路径一致性由锁路径检查对照，而不是共用代码。
-- 脚本检查不经过 `home-manager-generation/activate`：DAG 顺序与 `DRY_RUN` 传递由接线方式保证，实际行为以一次 `switch` 验收。
+- 脚本检查覆盖各脚本的失败与重试。接线检查用临时 User 配置求值真实 Home Manager DAG，验证外观任务位于 `writeBoundary` 之后，并运行这些条目来检查 `DRY_RUN`、含空格的非默认路径和 DMS 首启配置。整机激活仍通过 `switch` 验收。
 
 ## 后果
 
 - 改种子或迁移行为只需读一个 `.sh`，可在临时目录直接复现；shellcheck 在构建期拦下引用错误（这次就拦下了 `$key[[:space:]]` 被当成数组下标）。
-- 路径只有一个算法（`mkPaths`）。若将来有人把 `xdg.dataHome` 改成非默认值，锁路径检查会失败，逼一次显式决定。
+- 接线直接使用 Home Manager 求值出的 XDG 路径。若将来有人把 `xdg.dataHome` 改成非默认值，锁路径检查会失败，逼一次显式决定。
 - 干跑不再写盘，`nixos-rebuild dry-activate` 的语义恢复。
